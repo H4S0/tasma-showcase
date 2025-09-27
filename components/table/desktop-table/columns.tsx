@@ -1,11 +1,20 @@
 'use client';
-import { usePrismaMutation } from '@/app/hooks/use-prisma-query';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
-import { QueryKey } from '@tanstack/react-query';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown } from 'lucide-react';
+import { ArrowUpDown, MenuIcon } from 'lucide-react';
 import React from 'react';
+import {
+  DeletePostButton,
+  DeleteSelectedPostsButton,
+} from '../components/delete-buttons';
 
 export type Post = {
   id: string;
@@ -43,18 +52,16 @@ export const columns: ColumnDef<Post>[] = [
   },
   {
     accessorKey: 'title',
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
-          className="p-0 hover:bg-transparent"
-        >
-          Title
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        className="p-0 hover:bg-transparent"
+      >
+        Title
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
     cell: ({ row }) => <div className="w-[200px]">{row.getValue('title')}</div>,
   },
   {
@@ -74,7 +81,26 @@ export const columns: ColumnDef<Post>[] = [
   },
   {
     id: 'actions',
-    header: 'Actions',
+    header: ({ table }) => {
+      return (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              disabled={table.getSelectedRowModel().rows.length === 0}
+              variant="outline"
+              size="sm"
+            >
+              <MenuIcon className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent>
+            <DropdownMenuLabel>Bulk Actions</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DeleteSelectedPostsButton table={table} />
+          </DropdownMenuContent>
+        </DropdownMenu>
+      );
+    },
     cell: ({ row, table }) => {
       return (
         <DeletePostButton
@@ -88,40 +114,3 @@ export const columns: ColumnDef<Post>[] = [
     enableHiding: false,
   },
 ];
-
-type DeletePostButtonProps = {
-  postId: string;
-  queryKey: QueryKey;
-  onSuccess?: () => void;
-};
-
-function DeletePostButton({
-  postId,
-  queryKey,
-  onSuccess,
-}: DeletePostButtonProps) {
-  const deletePost = usePrismaMutation(
-    {
-      model: 'post',
-      operation: 'delete',
-      args: { where: { id: postId } },
-      queryKey,
-    },
-    {
-      onSuccess: () => {
-        onSuccess?.();
-      },
-    }
-  );
-
-  return (
-    <Button
-      variant="destructive"
-      size="sm"
-      onClick={() => deletePost.mutate({ where: { id: postId } })}
-      disabled={deletePost.isPending}
-    >
-      {deletePost.isPending ? 'Deleting...' : 'Delete'}
-    </Button>
-  );
-}
