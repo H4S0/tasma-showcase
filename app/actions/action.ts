@@ -1,26 +1,25 @@
-import { getPrismaModelsWithFields } from '@/lib/parse';
+// app/actions/typedModels.ts
+import { getPrismaModelsWithFields, PrismaModelRuntime } from '@/lib/parse';
 import { PrismaModels } from '@/types/prismaModels';
 
-type PrismaData<M extends PrismaModels> = {
-  [K in keyof M]: {
-    [F in keyof M[K]]: any;
-  };
+type ModelValues<M extends keyof PrismaModels> = {
+  [F in keyof PrismaModels[M]]: PrismaModels[M][F] | null;
 };
 
-export async function getTypedModels(): Promise<PrismaData<PrismaModels>> {
-  const fetched = await getPrismaModelsWithFields();
+export type TypedModels = {
+  [M in keyof PrismaModels]: ModelValues<M>;
+};
 
-  const result = {} as PrismaData<PrismaModels>;
+export async function getTypedModels(): Promise<TypedModels> {
+  const fetched: PrismaModelRuntime[] = await getPrismaModelsWithFields();
+  const result = {} as TypedModels;
 
   for (const model of fetched) {
-    const modelName = model.name as keyof PrismaModels;
-    const fields = {} as any;
-
+    const fields: any = {};
     for (const field of model.fields) {
-      fields[field.name] = null;
+      fields[field.name] = null; // default runtime value
     }
-
-    result[modelName] = fields;
+    result[model.name] = fields;
   }
 
   return result;
