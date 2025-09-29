@@ -1,36 +1,30 @@
+import { PrismaModels } from '@/types/prismaModels';
 import { readFile } from 'fs/promises';
 import path from 'path';
 
-export interface PrismaField<Type extends string = string> {
-  name: string;
-  type: Type;
-  isRequired: boolean;
-  isList: boolean;
-}
-
-export interface PrismaModel<
-  Name extends string = string,
-  Field extends PrismaField = PrismaField
+export async function getPrismaModelsWithFields(): Promise<
+  {
+    name: keyof PrismaModels;
+    fields: {
+      name: PrismaModels[keyof PrismaModels];
+      type: string;
+      isRequired: boolean;
+      isList: boolean;
+    }[];
+  }[]
 > {
-  name: Name;
-  fields: Field[];
-}
-
-export async function getPrismaModelsFromSchema<
-  Model extends PrismaModel = PrismaModel
->(): Promise<Model[]> {
   const schemaPath = path.resolve(process.cwd(), 'prisma/schema.prisma');
   const schema = await readFile(schemaPath, 'utf-8');
 
-  const models: Model[] = [];
-  const modelRegex = /model\s+(\w+)\s*{([\s\S]*?)^}/gm;
-
+  const models = [];
+  const modelRegex = /model\s+(\w+)\s*{([\s\S]*?)}/gm;
   let match: RegExpExecArray | null;
+
   while ((match = modelRegex.exec(schema)) !== null) {
-    const modelName = match[1];
+    const modelName = match[1] as keyof PrismaModels;
     const body = match[2];
 
-    const fields: PrismaField[] = [];
+    const fields = [];
     const lines = body
       .split('\n')
       .map((l) => l.trim())
@@ -42,8 +36,7 @@ export async function getPrismaModelsFromSchema<
       const parts = line.split(/\s+/);
       if (parts.length < 2) continue;
 
-      const name = parts[0];
-      let type = parts[1];
+      let [name, type] = parts;
       let isList = false;
       let isRequired = false;
 
@@ -57,10 +50,10 @@ export async function getPrismaModelsFromSchema<
         type = type.slice(0, -1);
       }
 
-      fields.push({ name, type, isRequired, isList });
+      fields.push({ name: name as any, type, isRequired, isList });
     }
 
-    models.push({ name: modelName, fields } as Model);
+    models.push({ name: modelName, fields });
   }
 
   return models;
