@@ -80,41 +80,6 @@ class PrismaApiClient {
 
     return Array.isArray(data) ? data : [data];
   }
-
-  async getPrismaModels<TModel extends keyof PrismaClient>(): Promise<
-    TModel[]
-  > {
-    try {
-      const response = await fetch(`${this.baseUrl}/models`, {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      });
-
-      if (response.ok) {
-        const models = await response.json();
-        return models as TModel[];
-      } else {
-        console.warn('Failed to fetch models, status:', response.status);
-        return []; // Return empty array instead of undefined
-      }
-    } catch (error) {
-      console.warn(
-        'Could not fetch models from API, falling back to static list',
-        error
-      );
-      return []; // Return empty array instead of undefined
-    }
-  }
 }
 
-export async function testModels() {
-  try {
-    const models = await prismaApiClient.getPrismaModels();
-    console.log('Available models:', models);
-    return models;
-  } catch (error) {
-    console.error('Error getting models:', error);
-    return [];
-  }
-}
 export const prismaApiClient = new PrismaApiClient();

@@ -1,11 +1,26 @@
-const Page = async () => {
-  const res = await fetch(`http://localhost:3000/api/prisma/models`, {
-    cache: 'no-store',
-  });
-  const models = await res.json();
+import { getPrismaModelsWithFields } from '@/app/actions/action';
+import { PrismaModels } from '@/types/prismaModels';
 
-  console.log(models);
-  return <div>Models: {models.join(', ')}</div>;
-};
+interface PrismaField<Name extends string> {
+  name: Name;
+  type: string;
+  isRequired: boolean;
+  isList: boolean;
+}
 
-export default Page;
+interface PrismaModel<Name extends keyof PrismaModels> {
+  name: Name;
+  fields: PrismaField<PrismaModels[Name]>[];
+}
+
+const models: PrismaModel<keyof PrismaModels>[] =
+  await getPrismaModelsWithFields();
+
+export default async function Page() {
+  return (
+    <div>
+      <h1>Prisma Models</h1>
+      <pre>{models.map((model) => model.fields.map((item) => item.name))}</pre>
+    </div>
+  );
+}
