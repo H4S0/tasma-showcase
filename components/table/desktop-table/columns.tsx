@@ -9,12 +9,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ColumnDef } from '@tanstack/react-table';
-import { ArrowUpDown, MenuIcon } from 'lucide-react';
+import { ArrowUpDown, Ellipsis } from 'lucide-react';
 import React from 'react';
-import {
-  DeletePostButton,
-  DeleteSelectedPostsButton,
-} from '../components/delete-buttons';
+import { DeleteSelectedPostsButton } from '../components/delete-buttons';
+import ActionDropdown from '../components/action-dropdown';
 
 export type Post = {
   id: string;
@@ -90,7 +88,7 @@ export const columns: ColumnDef<Post>[] = [
               variant="outline"
               size="sm"
             >
-              <MenuIcon className="h-4 w-4" />
+              <Ellipsis className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent>
@@ -103,8 +101,8 @@ export const columns: ColumnDef<Post>[] = [
     },
     cell: ({ row, table }) => {
       return (
-        <DeletePostButton
-          postId={row.original.id}
+        <ActionDropdown
+          post={row.original}
           queryKey={table.options.meta?.queryKey}
           onSuccess={table.options.meta?.onDeleteSuccess}
         />

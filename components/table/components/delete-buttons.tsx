@@ -1,5 +1,4 @@
 import { usePrismaMutation } from '@/app/hooks/use-prisma-query';
-import { Button } from '@/components/ui/button';
 import { DropdownMenuItem } from '@/components/ui/dropdown-menu';
 import { Post } from '@prisma/client';
 import { QueryKey } from '@tanstack/react-query';
@@ -75,13 +74,12 @@ export function DeletePostButton({
   );
 
   return (
-    <Button
+    <DropdownMenuItem
       variant="destructive"
-      size="sm"
       onClick={() => deletePost.mutate({ where: { id: postId } })}
       disabled={deletePost.isPending}
     >
       {deletePost.isPending ? 'Deleting...' : 'Delete'}
-    </Button>
+    </DropdownMenuItem>
   );
 }
