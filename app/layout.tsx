@@ -35,7 +35,7 @@ export default function RootLayout({
           <Providers>
             <Navbar />
 
-            <main className="p-8">{children}</main>
+            <main>{children}</main>
             <Toaster richColors />
           </Providers>
         </body>
