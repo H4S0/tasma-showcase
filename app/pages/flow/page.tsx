@@ -20,14 +20,20 @@ export default async function Page() {
           {modelNames.map((model) => (
             <li key={model}>
               <DropdownMenu>
-                <DropdownMenuTrigger className="w-full text-left px-3 py-2 font-medium rounded-md bg-white shadow hover:bg-gray-50">
+                <DropdownMenuTrigger className="w-full text-left px-3 py-2 font-medium rounded-md shadow">
                   {model}
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56">
+                <DropdownMenuContent className="w-64">
                   <DropdownMenuLabel>{model} fields</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  {Object.keys(models[model]).map((field) => (
-                    <DropdownMenuItem key={field}>{field}</DropdownMenuItem>
+                  {Object.entries(models[model]).map(([field, meta]) => (
+                    <DropdownMenuItem
+                      key={field}
+                      className="flex justify-between"
+                    >
+                      <span>{field}</span>
+                      <span className="text-gray-500 text-sm">{meta.type}</span>
+                    </DropdownMenuItem>
                   ))}
                 </DropdownMenuContent>
               </DropdownMenu>
