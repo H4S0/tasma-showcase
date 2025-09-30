@@ -2,7 +2,6 @@
 
 import { useState, useCallback } from 'react';
 import {
-  Connection,
   Edge,
   ReactFlow,
   addEdge,
@@ -14,10 +13,12 @@ import {
   applyNodeChanges,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import ModelNode from './client-page/model-nodes';
+import ModelNode from './nodes/model-nodes';
+import OperationNode from './nodes/operation-node';
 
 const nodeTypes = {
   modelNode: ModelNode,
+  operatorNode: OperationNode,
 };
 
 export default function FlowCanvas({
@@ -25,7 +26,7 @@ export default function FlowCanvas({
   setNodes,
 }: {
   nodes: Node[];
-  setNodes: (node: Node[]) => void;
+  setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
 }) {
   const [edges, setEdges] = useState<Edge[]>([]);
 
