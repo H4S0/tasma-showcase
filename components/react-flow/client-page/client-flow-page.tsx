@@ -61,7 +61,7 @@ const ClientFlowPage = ({ models }: ClientFlowPageProps) => {
         <h2 className="text-lg font-bold mb-4">Prisma Models</h2>
         <ul className="space-y-4">
           {modelNames.map((model) => (
-            <li key={model} onClick={() => addNode(model)}>
+            <li key={model}>
               <DropdownMenu>
                 <DropdownMenuTrigger className="w-full text-left px-3 py-2 font-medium rounded-md shadow">
                   {model}
@@ -69,6 +69,7 @@ const ClientFlowPage = ({ models }: ClientFlowPageProps) => {
                 <DropdownMenuContent className="w-64">
                   <DropdownMenuLabel>{model} fields</DropdownMenuLabel>
                   <DropdownMenuSeparator />
+
                   {Object.entries(models[model]).map(([field, meta]) => (
                     <DropdownMenuItem
                       key={field}
@@ -78,6 +79,15 @@ const ClientFlowPage = ({ models }: ClientFlowPageProps) => {
                       <span className="text-gray-500 text-sm">{meta.type}</span>
                     </DropdownMenuItem>
                   ))}
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    className="text-center font-semibold text-blue-600 cursor-pointer"
+                    onClick={() => addNode(model)}
+                  >
+                    + Add Node
+                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </li>
