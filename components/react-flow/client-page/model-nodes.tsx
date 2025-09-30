@@ -1,5 +1,7 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Separator } from '@/components/ui/separator';
 
 type ModelNodeProps = {
   data: {
@@ -10,11 +12,12 @@ type ModelNodeProps = {
 
 const ModelNode = ({ data }: ModelNodeProps) => {
   return (
-    <div className="rounded-lg shadow-md bg-white border border-gray-300 w-64">
-      <div className="bg-gray-100 px-3 py-2 font-semibold border-b border-gray-300">
-        {data.modelName}
-      </div>
-      <ul className="divide-y divide-gray-200">
+    <Card className="w-60">
+      <CardHeader>
+        <CardTitle>{data.modelName}</CardTitle>
+      </CardHeader>
+      <Separator />
+      <CardContent className="divide-y divide-gray-200 p-0">
         {data.fields.map((field) => (
           <li
             key={field.name}
@@ -24,11 +27,11 @@ const ModelNode = ({ data }: ModelNodeProps) => {
             <span className="text-gray-500">{field.type}</span>
           </li>
         ))}
-      </ul>
+      </CardContent>
 
       <Handle type="source" position={Position.Right} />
       <Handle type="target" position={Position.Left} />
-    </div>
+    </Card>
   );
 };
 
