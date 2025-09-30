@@ -13,7 +13,7 @@ import { Node } from '@xyflow/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Model } from './client-page/client-flow-page';
 
-type NodeKind = 'model' | 'operation' | 'join' | 'condition';
+type NodeKind = 'model' | 'operator' | 'join' | 'condition';
 
 interface BaseNodeData extends Record<string, unknown> {
   label: string;
@@ -70,7 +70,7 @@ const SidebarFlow = ({
           };
           break;
 
-        case 'operation':
+        case 'operator':
           data = {
             label: options.operator,
             operator: options.operator,
@@ -126,48 +126,54 @@ const SidebarFlow = ({
           <TabsTrigger value="condition">Condition</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="models" className="mt-5">
-          <ul className="space-y-4">
-            {modelNames.map((model) => (
-              <li key={model}>
-                <DropdownMenu>
-                  <DropdownMenuTrigger className="w-full text-left px-3 py-2 font-medium rounded-md shadow">
-                    {model}
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-64">
-                    <DropdownMenuLabel>{model} fields</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
+        <TabsContent value="models" className="mt-5 space-y-3">
+          {modelNames.map((model) => (
+            <div key={model}>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="w-full text-left px-3 py-2 font-medium rounded-md shadow">
+                  {model}
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-64">
+                  <DropdownMenuLabel>{model} fields</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
 
-                    {Object.entries(models[model]).map(([field, meta]) => (
-                      <DropdownMenuItem
-                        key={field}
-                        className="flex justify-between"
-                      >
-                        <span>{field}</span>
-                        <span className="text-gray-500 text-sm">
-                          {meta.type}
-                        </span>
-                      </DropdownMenuItem>
-                    ))}
-
-                    <DropdownMenuSeparator />
-
+                  {Object.entries(models[model]).map(([field, meta]) => (
                     <DropdownMenuItem
-                      className="text-center font-semibold text-blue-600 cursor-pointer"
-                      onClick={() => addNode('model', { model })}
+                      key={field}
+                      className="flex justify-between"
                     >
-                      + Add Node
+                      <span>{field}</span>
+                      <span className="text-gray-500 text-sm">{meta.type}</span>
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </li>
-            ))}
-          </ul>
+                  ))}
+
+                  <DropdownMenuSeparator />
+
+                  <DropdownMenuItem
+                    className="text-center font-semibold text-blue-600 cursor-pointer"
+                    onClick={() => addNode('model', { model })}
+                  >
+                    + Add Node
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          ))}
         </TabsContent>
 
-        <TabsContent value="operators" className="mt-5">
-          <li onClick={() => addNode('operation', { operator: 'AND' })}>and</li>
-          <li onClick={() => addNode('operation', { operator: 'OR' })}>or</li>
+        <TabsContent value="operators" className="mt-5 space-y-3">
+          <div
+            onClick={() => addNode('operator', { operator: 'AND' })}
+            className="w-full text-left px-3 py-2 font-medium rounded-md shadow"
+          >
+            AND
+          </div>
+          <div
+            onClick={() => addNode('operator', { operator: 'OR' })}
+            className="w-full text-left px-3 py-2 font-medium rounded-md shadow"
+          >
+            OR
+          </div>
         </TabsContent>
 
         <TabsContent value="join" className="mt-5">
