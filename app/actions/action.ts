@@ -1,4 +1,3 @@
-// app/actions/typedModels.ts
 import { getPrismaModelsWithFields, PrismaModelRuntime } from '@/lib/parse';
 import { PrismaModels } from '@/types/prismaModels';
 
@@ -17,7 +16,7 @@ export async function getTypedModels(): Promise<TypedModels> {
   for (const model of fetched) {
     const fields: any = {};
     for (const field of model.fields) {
-      fields[field.name] = null; // default runtime value
+      fields[field.name] = null;
     }
     result[model.name] = fields;
   }

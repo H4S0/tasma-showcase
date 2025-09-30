@@ -12,6 +12,7 @@ async function generate() {
 
   const modelRegex = /model\s+(\w+)\s*{([\s\S]*?)}/gm;
   let match: RegExpExecArray | null;
+
   let output = `// Generated file, do not edit\n\nexport type PrismaModels = {\n`;
 
   while ((match = modelRegex.exec(schema)) !== null) {
@@ -22,15 +23,47 @@ async function generate() {
       .map((l) => l.trim())
       .filter(Boolean);
 
-    const fields: string[] = [];
+    output += `  ${modelName}: {\n`;
+
     for (const line of lines) {
       if (line.startsWith('@@') || line.startsWith('@')) continue;
+
       const parts = line.split(/\s+/);
       if (parts.length < 2) continue;
-      fields.push(parts[0]);
+
+      const name = parts[0];
+      let type = parts[1];
+
+      let isList = false;
+      let isOptional = false;
+
+      if (type.endsWith('[]')) {
+        type = type.slice(0, -2);
+        isList = true;
+      }
+      if (type.endsWith('?')) {
+        type = type.slice(0, -1);
+        isOptional = true;
+      }
+
+      const typeMap: Record<string, string> = {
+        String: 'string',
+        Int: 'number',
+        Float: 'number',
+        Boolean: 'boolean',
+        DateTime: 'Date',
+        Json: 'any',
+      };
+
+      let tsType = typeMap[type] ?? 'any';
+
+      if (isList) tsType += '[]';
+      if (isOptional) tsType += ' | null';
+
+      output += `    ${name}: ${tsType};\n`;
     }
 
-    output += `  ${modelName}: ${fields.map((f) => `'${f}'`).join(' | ')};\n`;
+    output += `  };\n`;
   }
 
   output += `};\n`;

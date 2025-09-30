@@ -1,5 +1,3 @@
-// app/page.tsx
-
 import { getTypedModels } from '@/app/actions/action';
 
 export default async function Page() {

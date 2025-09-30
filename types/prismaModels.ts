@@ -1,6 +1,17 @@
 // Generated file, do not edit
 
 export type PrismaModels = {
-  User: 'id' | 'firstName' | 'lastName' | 'email' | 'createdAt';
-  Post: 'id' | 'title' | 'content' | 'createdAt';
+  User: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    createdAt: Date;
+  };
+  Post: {
+    id: string;
+    title: string;
+    content: string;
+    createdAt: Date;
+  };
 };
