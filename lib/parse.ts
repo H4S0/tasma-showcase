@@ -1,4 +1,3 @@
-// lib/parse.ts
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { PrismaModels } from '@/types/prismaModels';

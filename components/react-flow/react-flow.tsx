@@ -1,47 +1,66 @@
+'use client';
+
 import { useState, useCallback } from 'react';
 import {
+  Connection,
+  Edge,
   ReactFlow,
-  applyNodeChanges,
-  applyEdgeChanges,
   addEdge,
+  Node,
+  Background,
+  Controls,
+  MiniMap,
+  applyEdgeChanges,
+  applyNodeChanges,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import ModelNode from './client-page/model-nodes';
 
-const initialNodes = [
-  { id: 'n1', position: { x: 0, y: 0 }, data: { label: 'Node 1' } },
-  { id: 'n2', position: { x: 0, y: 100 }, data: { label: 'Node 2' } },
-];
-const initialEdges = [{ id: 'n1-n2', source: 'n1', target: 'n2' }];
+const nodeTypes = {
+  modelNode: ModelNode,
+};
 
-export default function App() {
-  const [nodes, setNodes] = useState(initialNodes);
-  const [edges, setEdges] = useState(initialEdges);
+export default function FlowCanvas({
+  nodes,
+  setNodes,
+}: {
+  nodes: Node[];
+  setNodes: (node: Node[]) => void;
+}) {
+  const [edges, setEdges] = useState<Edge[]>([]);
 
   const onNodesChange = useCallback(
-    (changes) =>
-      setNodes((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
-    []
+    (changes) => setNodes(applyNodeChanges(changes, nodes)),
+    [nodes, setNodes]
   );
+
   const onEdgesChange = useCallback(
     (changes) =>
       setEdges((edgesSnapshot) => applyEdgeChanges(changes, edgesSnapshot)),
     []
   );
+
   const onConnect = useCallback(
     (params) => setEdges((edgesSnapshot) => addEdge(params, edgesSnapshot)),
     []
   );
 
   return (
-    <div style={{ width: '100vw', height: '100vh' }}>
+    <div className="h-full w-full">
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onDragOver={(event) => event.preventDefault()}
         fitView
-      />
+      >
+        <Background />
+        <Controls />
+        <MiniMap />
+      </ReactFlow>
     </div>
   );
 }
