@@ -1,5 +1,7 @@
 import React from 'react';
 import { Node, Edge } from '@xyflow/react';
+import { generateQuery } from '@/lib/generate-prisma-query';
+import { ModelNodeData } from './sidebar-flow';
 
 type QueryBuilderPreviewProps = {
   nodes: Node[];
@@ -7,15 +9,17 @@ type QueryBuilderPreviewProps = {
 };
 
 const QueryBuilderPreview = ({ nodes, edges }: QueryBuilderPreviewProps) => {
-  const tableNodes = nodes.filter((node) => node.type === 'modelNode');
+  const modelNodes = nodes.filter(
+    (node): node is Node<ModelNodeData> => node.type === 'modelNode'
+  );
 
-  const starterQueryText = `const result = await prisma.ModelName.findMany({
-    include: {
-      posts: true
-    }
-  });`;
+  const queries = modelNodes.map((node) => generateQuery(node, nodes, edges));
 
-  return <div>QueryBuilderPreview</div>;
+  return (
+    <pre className="bg-gray-100 p-4 rounded text-sm">
+      {queries.join('\n\n')}
+    </pre>
+  );
 };
 
 export default QueryBuilderPreview;

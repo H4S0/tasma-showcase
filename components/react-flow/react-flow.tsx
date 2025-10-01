@@ -34,6 +34,7 @@ export default function FlowCanvas({
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
 }) {
   const [edges, setEdges] = useState<Edge[]>([]);
+  const [showQueryPreview, setShowQueryPreview] = useState(true);
 
   const onNodesChange = useCallback(
     (changes) => setNodes(applyNodeChanges(changes, nodes)),
@@ -52,23 +53,37 @@ export default function FlowCanvas({
   );
 
   return (
-    <div className="h-full w-full">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
-        onDragOver={(event) => event.preventDefault()}
-        fitView
-      >
-        <Background />
-        <Controls />
-        <MiniMap />
-      </ReactFlow>
+    <div className="flex h-full w-full">
+      <div className="flex-1 relative">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onDragOver={(event) => event.preventDefault()}
+          fitView
+        >
+          <Background />
+          <Controls />
+          <MiniMap />
+        </ReactFlow>
 
-      <QueryBuilderPreview nodes={nodes} edges={edges} />
+        <button
+          onClick={() => setShowQueryPreview((v) => !v)}
+          className="absolute top-4 right-4 z-10 bg-blue-600 text-white px-3 py-1 rounded shadow"
+        >
+          {showQueryPreview ? 'Hide Query' : 'Show Query'}
+        </button>
+      </div>
+
+      {showQueryPreview && (
+        <div className="w-96 border-l border-gray-300 overflow-y-auto bg-gray-50 p-4">
+          <h2 className="text-lg font-semibold mb-2">Query Preview</h2>
+          <QueryBuilderPreview nodes={nodes} edges={edges} />
+        </div>
+      )}
     </div>
   );
 }

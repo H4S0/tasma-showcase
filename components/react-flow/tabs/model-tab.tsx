@@ -28,11 +28,26 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
   const [selectedQueryTypes, setSelectedQueryTypes] = useState<
     Record<string, ModelNodeData['queryType']>
   >({});
+  const [selectedFieldsMap, setSelectedFieldsMap] = useState<
+    Record<string, string[]>
+  >({});
 
   return (
     <TabsContent value="models" className="mt-5 space-y-3">
       {modelNames.map((model) => {
         const queryType = selectedQueryTypes[model] || 'findMany';
+        const selectedFields = selectedFieldsMap[model] || [];
+
+        const toggleField = (field: string) => {
+          setSelectedFieldsMap((prev) => {
+            const current = prev[model] || [];
+            if (current.includes(field)) {
+              return { ...prev, [model]: current.filter((f) => f !== field) };
+            } else {
+              return { ...prev, [model]: [...current, field] };
+            }
+          });
+        };
 
         return (
           <div key={model}>
@@ -48,9 +63,17 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                 {Object.entries(models[model]).map(([field, meta]) => (
                   <DropdownMenuItem
                     key={field}
-                    className="flex justify-between"
+                    className="flex justify-between items-center"
                   >
-                    <span>{field}</span>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={selectedFields.includes(field)}
+                        onChange={() => toggleField(field)}
+                        className="w-4 h-4"
+                      />
+                      <span>{field}</span>
+                    </label>
                     <span className="text-gray-500 text-sm">{meta.type}</span>
                   </DropdownMenuItem>
                 ))}
@@ -89,7 +112,7 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                     setNodes('model', {
                       model,
                       queryType,
-                      selectedFields: [],
+                      selectedFields,
                       includeRelations: [],
                     })
                   }

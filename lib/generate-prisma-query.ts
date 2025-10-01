@@ -1,47 +1,38 @@
 import {
-  JoinNodeData,
+  ConditionNodeData,
   ModelNodeData,
 } from '@/components/react-flow/sidebar-flow';
 import { Node, Edge } from '@xyflow/react';
 
 export function generateQuery(
-  node: Node<ModelNodeData>,
-  nodes: Node[],
-  edges: Edge[]
+  modelNode: Node<ModelNodeData>,
+  allNodes: Node[],
+  allEdges: Edge[]
 ) {
-  const { modelName, queryType, selectedFields, includeRelations } = node.data;
+  const conditions = allEdges
+    .filter((edge) => edge.target === modelNode.id)
+    .map((edge) => allNodes.find((n) => n.id === edge.source))
+    .filter(
+      (n): n is Node<ConditionNodeData> => !!n && n.type === 'conditionNode'
+    );
 
-  const selectStr = selectedFields?.length
-    ? `{ ${selectedFields.join(', ')} }`
-    : undefined;
+  const where: Record<string, any> = {};
 
-  const includes: Record<string, boolean> = {};
-
-  edges.forEach((edge) => {
-    const joinNode = nodes.find(
-      (n) => n.id === edge.source && n.type === 'joinNode'
-    ) as Node<JoinNodeData>;
-
-    if (!joinNode) return;
-
-    if (joinNode.data.fromModel === modelName) {
-      includes[joinNode.data.toModel] = true;
-    }
-
-    if (joinNode.data.toModel === modelName) {
-      includes[joinNode.data.fromModel] = true;
-    }
+  conditions.forEach((cond) => {
+    where[cond.data.field] = cond.data.value;
   });
 
-  const includeStr = Object.keys(includes).length
-    ? `{ ${Object.keys(includes).join(': true, ')}: true }`
-    : undefined;
+  const select: Record<string, boolean> = {};
+  modelNode.data.selectedFields?.forEach((field) => {
+    select[field] = true;
+  });
 
-  let query = `const result = await prisma.${modelName}.${queryType}({\n`;
-
-  if (selectStr) query += `  select: ${selectStr},\n`;
-  if (includeStr) query += `  include: ${includeStr},\n`;
-  query += `});`;
-
-  return query;
+  return `const result = await prisma.${modelNode.data.modelName}.findMany({
+  ${
+    Object.keys(where).length
+      ? 'where: ' + JSON.stringify(where, null, 2) + ','
+      : ''
+  }
+  select: ${JSON.stringify(select, null, 2)}
+});`;
 }

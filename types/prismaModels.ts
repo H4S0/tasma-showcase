@@ -7,11 +7,14 @@ export type PrismaModels = {
     lastName: string;
     email: string;
     createdAt: Date;
+    posts: any[];
   };
   Post: {
     id: string;
     title: string;
     content: string;
     createdAt: Date;
+    authorId: string;
+    author: any;
   };
 };
