@@ -13,6 +13,11 @@ type ConditionNodeProps = {
 };
 
 const ConditionNode = ({ data }: ConditionNodeProps) => {
+  console.log(data);
+  const dotPosition = data.field.indexOf('.');
+  const displayField =
+    dotPosition !== -1 ? data.field.slice(dotPosition + 1) : data.field;
+
   return (
     <Card className="w-60 border border-yellow-400 ">
       <CardHeader className="flex items-center gap-2 text-yellow-400 ">
@@ -23,7 +28,7 @@ const ConditionNode = ({ data }: ConditionNodeProps) => {
       <Separator />
 
       <CardContent className="flex items-center justify-between px-3 py-2 text-sm bg-white/10 rounded-md">
-        <span className="font-medium">{data.field}</span>
+        <span className="font-medium">{displayField}</span>
         <span className="mx-2">{data.comparator}</span>
         <span className="text-muted-foreground">{data.value}</span>
       </CardContent>

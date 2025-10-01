@@ -19,30 +19,32 @@ export function generateQuery(
   const where: Record<string, any> = {};
   conditions.forEach((cond) => {
     const { field, comparator, value } = cond.data;
+    const cleanField = field.includes('.') ? field.split('.')[1] : field;
+
     switch (comparator) {
       case '=':
-        where[field] = value;
+        where[cleanField] = value;
         break;
       case '!=':
-        where[field] = { not: value };
+        where[cleanField] = { not: value };
         break;
       case '>':
-        where[field] = { gt: value };
+        where[cleanField] = { gt: value };
         break;
       case '>=':
-        where[field] = { gte: value };
+        where[cleanField] = { gte: value };
         break;
       case '<':
-        where[field] = { lt: value };
+        where[cleanField] = { lt: value };
         break;
       case '<=':
-        where[field] = { lte: value };
+        where[cleanField] = { lte: value };
         break;
       case 'IN':
-        where[field] = { in: Array.isArray(value) ? value : [value] };
+        where[cleanField] = { in: Array.isArray(value) ? value : [value] };
         break;
       case 'NOT IN':
-        where[field] = { notIn: Array.isArray(value) ? value : [value] };
+        where[cleanField] = { notIn: Array.isArray(value) ? value : [value] };
         break;
     }
   });

@@ -47,7 +47,10 @@ const ConditionTab = ({ models, setNodes }: ModelTabProps) => {
               <p className="font-semibold px-3">{model}</p>
               <SelectSeparator />
               {Object.keys(models[model]).map((field) => (
-                <SelectItem key={`${model}.${field}`} value={`${field}`}>
+                <SelectItem
+                  key={`${model}.${field}`}
+                  value={`${model}.${field}`}
+                >
                   {field}
                 </SelectItem>
               ))}
