@@ -18,7 +18,33 @@ export function generateQuery(
 
   const where: Record<string, any> = {};
   conditions.forEach((cond) => {
-    where[cond.data.field] = cond.data.value;
+    const { field, comparator, value } = cond.data;
+    switch (comparator) {
+      case '=':
+        where[field] = value;
+        break;
+      case '!=':
+        where[field] = { not: value };
+        break;
+      case '>':
+        where[field] = { gt: value };
+        break;
+      case '>=':
+        where[field] = { gte: value };
+        break;
+      case '<':
+        where[field] = { lt: value };
+        break;
+      case '<=':
+        where[field] = { lte: value };
+        break;
+      case 'IN':
+        where[field] = { in: Array.isArray(value) ? value : [value] };
+        break;
+      case 'NOT IN':
+        where[field] = { notIn: Array.isArray(value) ? value : [value] };
+        break;
+    }
   });
 
   const select: Record<string, boolean> = {};
@@ -30,17 +56,30 @@ export function generateQuery(
     .map(([key, value]) => `${key}: ${value}`)
     .join(', ');
 
+  const include: Record<string, boolean> = {};
+  modelNode.data.includeRelations?.forEach((rel) => {
+    include[rel] = true;
+  });
+
   const whereString =
     Object.keys(where).length > 0
       ? 'where: {\n' +
         Object.entries(where)
-          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+          .map(([key, value]) => {
+            console.log(key);
+            return `${key}: ${JSON.stringify(value)}`;
+          })
           .join(',\n') +
         '},'
       : '';
 
+  const includeString =
+    Object.keys(include).length > 0
+      ? 'include: { ' + Object.keys(include).join(': true, ') + ': true }'
+      : '';
+
   return `const result = await prisma.${modelNode.data.modelName}.findMany({
   ${whereString}
-  select: { ${selectString} }
+  select: { ${selectString} }${includeString ? ', ' + includeString : ''}
 });`;
 }

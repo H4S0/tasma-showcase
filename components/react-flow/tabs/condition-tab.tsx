@@ -52,7 +52,7 @@ const ConditionTab = ({ models, setNodes }: ModelTabProps) => {
                   </div>
                 )}
 
-                <SelectItem value={`${model}.${field}`}>{field}</SelectItem>
+                <SelectItem value={`${field}`}>{field}</SelectItem>
               </div>
             ))
           )}
