@@ -6,6 +6,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
@@ -42,10 +43,17 @@ const ConditionTab = ({ models, setNodes }: ModelTabProps) => {
         </SelectTrigger>
         <SelectContent>
           {modelNames.flatMap((model) =>
-            Object.keys(models[model]).map((field) => (
-              <SelectItem key={`${model}.${field}`} value={`${model}.${field}`}>
-                {model}.{field}
-              </SelectItem>
+            Object.keys(models[model]).map((field, index) => (
+              <div key={`${model}.${field}`}>
+                {index === 0 && (
+                  <div>
+                    <p className="font-semibold px-3">{model}</p>
+                    <SelectSeparator />
+                  </div>
+                )}
+
+                <SelectItem value={`${model}.${field}`}>{field}</SelectItem>
+              </div>
             ))
           )}
         </SelectContent>
