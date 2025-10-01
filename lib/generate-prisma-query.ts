@@ -17,7 +17,6 @@ export function generateQuery(
     );
 
   const where: Record<string, any> = {};
-
   conditions.forEach((cond) => {
     where[cond.data.field] = cond.data.value;
   });
@@ -27,12 +26,21 @@ export function generateQuery(
     select[field] = true;
   });
 
+  const selectString = Object.entries(select)
+    .map(([key, value]) => `${key}: ${value}`)
+    .join(', ');
+
+  const whereString =
+    Object.keys(where).length > 0
+      ? 'where: {\n' +
+        Object.entries(where)
+          .map(([key, value]) => `${key}: ${JSON.stringify(value)}`)
+          .join(',\n') +
+        '},'
+      : '';
+
   return `const result = await prisma.${modelNode.data.modelName}.findMany({
-  ${
-    Object.keys(where).length
-      ? 'where: ' + JSON.stringify(where, null, 2) + ','
-      : ''
-  }
-  select: ${JSON.stringify(select, null, 2)}
+  ${whereString}
+  select: { ${selectString} }
 });`;
 }

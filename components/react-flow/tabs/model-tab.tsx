@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export type ModelTabProps = {
   setNodes: (kind: NodeKind, options?: any) => void;
@@ -64,16 +65,18 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                   <DropdownMenuItem
                     key={field}
                     className="flex justify-between items-center"
+                    onClick={(e) => e.preventDefault()}
                   >
-                    <label className="flex items-center gap-2 cursor-pointer">
-                      <input
-                        type="checkbox"
+                    <div
+                      className="flex items-center gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <Checkbox
                         checked={selectedFields.includes(field)}
-                        onChange={() => toggleField(field)}
-                        className="w-4 h-4"
+                        onCheckedChange={() => toggleField(field)}
                       />
                       <span>{field}</span>
-                    </label>
+                    </div>
                     <span className="text-gray-500 text-sm">{meta.type}</span>
                   </DropdownMenuItem>
                 ))}
