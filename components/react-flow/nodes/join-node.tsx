@@ -1,6 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Handle, Position } from '@xyflow/react';
+import { Link2 } from 'lucide-react';
 import React from 'react';
 
 type JoinNodeProps = {
@@ -14,13 +15,14 @@ type JoinNodeProps = {
 
 const JoinNode = ({ data }: JoinNodeProps) => {
   return (
-    <Card className="w-64 border-blue-500 shadow-lg">
-      <CardHeader>
-        <CardTitle className="text-sm font-semibold text-blue-600">
-          Join
-        </CardTitle>
+    <Card className="w-64 border border-blue-500 ">
+      <CardHeader className="flex items-center gap-2 text-blue-600">
+        <Link2 className="h-4 w-4" />
+        <CardTitle className="font-semibold ">Join</CardTitle>
       </CardHeader>
+
       <Separator />
+
       <CardContent className="space-y-2 text-sm">
         <div className="flex justify-between">
           <span className="font-medium">{data.fromModel}</span>

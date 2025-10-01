@@ -2,6 +2,7 @@ import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
+import { Database } from 'lucide-react';
 
 type ModelNodeProps = {
   data: {
@@ -13,10 +14,9 @@ type ModelNodeProps = {
 const ModelNode = ({ data }: ModelNodeProps) => {
   return (
     <Card className="w-60 border border-red-400">
-      <CardHeader>
-        <CardTitle className="text-red-400 font-semibold">
-          {data.modelName}
-        </CardTitle>
+      <CardHeader className="text-red-400  flex items-center gap-2">
+        <Database className="w-4 h-4" />
+        <CardTitle className="font-semibold">{data.modelName}</CardTitle>
       </CardHeader>
       <Separator />
       <CardContent className=" p-0">

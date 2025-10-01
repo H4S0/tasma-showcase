@@ -2,6 +2,7 @@ import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Filter } from 'lucide-react';
+import { Separator } from '@/components/ui/separator';
 
 type ConditionNodeProps = {
   data: {
@@ -18,6 +19,8 @@ const ConditionNode = ({ data }: ConditionNodeProps) => {
         <Filter className="w-4 h-4" />
         <CardTitle className="font-semibold">Condition</CardTitle>
       </CardHeader>
+
+      <Separator />
 
       <CardContent className="flex items-center justify-between px-3 py-2 text-sm bg-white/10 rounded-md">
         <span className="font-medium">{data.field}</span>
