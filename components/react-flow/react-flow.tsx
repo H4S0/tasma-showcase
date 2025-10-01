@@ -16,11 +16,13 @@ import '@xyflow/react/dist/style.css';
 import ModelNode from './nodes/model-nodes';
 import OperationNode from './nodes/operation-node';
 import JoinNode from './nodes/join-node';
+import ConditionNode from './nodes/condition-node';
 
 const nodeTypes = {
   modelNode: ModelNode,
   operatorNode: OperationNode,
   joinNode: JoinNode,
+  conditionNode: ConditionNode,
 };
 
 export default function FlowCanvas({

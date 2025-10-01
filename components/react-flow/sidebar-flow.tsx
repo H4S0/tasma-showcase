@@ -20,6 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../ui/select';
+import { Input } from '../ui/input';
 
 type NodeKind = 'model' | 'operator' | 'join' | 'condition';
 
@@ -45,7 +46,7 @@ interface JoinNodeData extends BaseNodeData {
 
 interface ConditionNodeData extends BaseNodeData {
   field: string;
-  comparator: '=' | '!=' | '>' | '<';
+  comparator: '=' | '!=' | '>' | '>=' | '<' | '<=' | 'IN' | 'NOT IN';
   value: string | number;
 }
 
@@ -66,6 +67,10 @@ const SidebarFlow = ({
   const [fromField, setFromField] = useState('');
   const [toModel, setToModel] = useState('');
   const [toField, setToField] = useState('');
+
+  const [conditionField, setConditionField] = useState('');
+  const [comparator, setComparator] = useState('');
+  const [conditionValue, setConditionValue] = useState('');
 
   const addNode = useCallback(
     (kind: NodeKind, options?: any) => {
@@ -136,6 +141,17 @@ const SidebarFlow = ({
 
   const modelNames = Object.keys(models) as (keyof typeof models)[];
 
+  const comparators: ConditionNodeData['comparator'][] = [
+    '=',
+    '!=',
+    '>',
+    '>=',
+    '<',
+    '<=',
+    'IN',
+    'NOT IN',
+  ];
+
   return (
     <aside className="w-72 bg-gray-100 border-r border-gray-300 p-4 overflow-y-auto">
       <Tabs defaultValue="models" className="w-full">
@@ -146,6 +162,7 @@ const SidebarFlow = ({
           <TabsTrigger value="condition">Condition</TabsTrigger>
         </TabsList>
 
+        {/* MODELS */}
         <TabsContent value="models" className="mt-5 space-y-3">
           {modelNames.map((model) => (
             <div key={model}>
@@ -181,6 +198,7 @@ const SidebarFlow = ({
           ))}
         </TabsContent>
 
+        {/* OPERATORS */}
         <TabsContent value="operators" className="mt-5 space-y-3">
           <div
             onClick={() => addNode('operator', { operator: 'AND' })}
@@ -284,30 +302,58 @@ const SidebarFlow = ({
         </TabsContent>
 
         <TabsContent value="condition" className="mt-5 space-y-3">
-          <div
+          <p className="text-gray-600 mb-2">Build a condition:</p>
+
+          <Select value={conditionField} onValueChange={setConditionField}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Field" />
+            </SelectTrigger>
+            <SelectContent>
+              {modelNames.flatMap((model) =>
+                Object.keys(models[model]).map((field) => (
+                  <SelectItem
+                    key={`${model}.${field}`}
+                    value={`${model}.${field}`}
+                  >
+                    {model}.{field}
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+
+          <Select value={comparator} onValueChange={setComparator}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="Select Comparator" />
+            </SelectTrigger>
+            <SelectContent>
+              {comparators.map((c) => (
+                <SelectItem key={c} value={c}>
+                  {c}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Input
+            placeholder="Value"
+            value={conditionValue}
+            onChange={(e) => setConditionValue(e.target.value)}
+          />
+
+          <Button
+            className="w-full mt-2"
+            disabled={!conditionField || !comparator || !conditionValue}
             onClick={() =>
               addNode('condition', {
-                field: 'age',
-                comparator: '>',
-                value: 18,
+                field: conditionField,
+                comparator,
+                value: conditionValue,
               })
             }
-            className="w-full text-left px-3 py-2 font-medium rounded-md shadow cursor-pointer"
           >
-            age &gt; 18
-          </div>
-          <div
-            onClick={() =>
-              addNode('condition', {
-                field: 'status',
-                comparator: '=',
-                value: 'ACTIVE',
-              })
-            }
-            className="w-full text-left px-3 py-2 font-medium rounded-md shadow cursor-pointer"
-          >
-            status = ACTIVE
-          </div>
+            + Add Condition
+          </Button>
         </TabsContent>
       </Tabs>
     </aside>
