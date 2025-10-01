@@ -15,10 +15,10 @@ type JoinNodeProps = {
 
 const JoinNode = ({ data }: JoinNodeProps) => {
   return (
-    <Card className="w-64 border border-blue-500 ">
-      <CardHeader className="flex items-center gap-2 text-blue-600">
+    <Card className="w-64 border border-blue-500 relative">
+      <CardHeader className="flex items-center gap-2 text-blue-600 p-2">
         <Link2 className="h-4 w-4" />
-        <CardTitle className="font-semibold ">Join</CardTitle>
+        <CardTitle className="font-semibold">Join</CardTitle>
       </CardHeader>
 
       <Separator />
