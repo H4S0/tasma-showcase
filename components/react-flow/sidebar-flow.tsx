@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,6 +12,14 @@ import {
 import { Node } from '@xyflow/react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { Model } from './client-page/client-flow-page';
+import { Button } from '../ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '../ui/select';
 
 type NodeKind = 'model' | 'operator' | 'join' | 'condition';
 
@@ -29,8 +37,10 @@ interface OperationNodeData extends BaseNodeData {
 }
 
 interface JoinNodeData extends BaseNodeData {
-  from: string;
-  to: string;
+  fromModel: string;
+  fromField: string;
+  toModel: string;
+  toField: string;
 }
 
 interface ConditionNodeData extends BaseNodeData {
@@ -52,12 +62,17 @@ const SidebarFlow = ({
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   models: Model;
 }) => {
+  const [fromModel, setFromModel] = useState('');
+  const [fromField, setFromField] = useState('');
+  const [toModel, setToModel] = useState('');
+  const [toField, setToField] = useState('');
+
   const addNode = useCallback(
     (kind: NodeKind, options?: any) => {
       let data: FlowNodeData;
 
       switch (kind) {
-        case 'model':
+        case 'model': {
           const model = options.model as string;
           const fields = Object.entries(models[model]).map(([name, meta]) => ({
             name,
@@ -69,23 +84,28 @@ const SidebarFlow = ({
             fields,
           };
           break;
+        }
 
-        case 'operator':
+        case 'operator': {
           data = {
             label: options.operator,
             operator: options.operator,
           };
           break;
+        }
 
-        case 'join':
+        case 'join': {
           data = {
-            label: 'Join',
-            from: options.from,
-            to: options.to,
+            label: `${options.fromModel}.${options.fromField} → ${options.toModel}.${options.toField}`,
+            fromModel: options.fromModel,
+            fromField: options.fromField,
+            toModel: options.toModel,
+            toField: options.toField,
           };
           break;
+        }
 
-        case 'condition':
+        case 'condition': {
           data = {
             label: `${options.field} ${options.comparator} ${options.value}`,
             field: options.field,
@@ -93,6 +113,7 @@ const SidebarFlow = ({
             value: options.value,
           };
           break;
+        }
 
         default:
           throw new Error('Unknown node kind');
@@ -122,10 +143,10 @@ const SidebarFlow = ({
           <TabsTrigger value="models">Models</TabsTrigger>
           <TabsTrigger value="operators">Operator</TabsTrigger>
           <TabsTrigger value="join">Join</TabsTrigger>
-          <TabsTrigger value="field-relation">Relation</TabsTrigger>
           <TabsTrigger value="condition">Condition</TabsTrigger>
         </TabsList>
 
+        {/* MODELS */}
         <TabsContent value="models" className="mt-5 space-y-3">
           {modelNames.map((model) => (
             <div key={model}>
@@ -161,31 +182,134 @@ const SidebarFlow = ({
           ))}
         </TabsContent>
 
+        {/* OPERATORS */}
         <TabsContent value="operators" className="mt-5 space-y-3">
           <div
             onClick={() => addNode('operator', { operator: 'AND' })}
-            className="w-full text-left px-3 py-2 font-medium rounded-md shadow"
+            className="w-full text-left px-3 py-2 font-medium rounded-md shadow cursor-pointer"
           >
             AND
           </div>
           <div
             onClick={() => addNode('operator', { operator: 'OR' })}
-            className="w-full text-left px-3 py-2 font-medium rounded-md shadow"
+            className="w-full text-left px-3 py-2 font-medium rounded-md shadow cursor-pointer"
           >
             OR
           </div>
         </TabsContent>
 
-        <TabsContent value="join" className="mt-5">
-          <p className="text-gray-600">Set up joins between models here.</p>
+        <TabsContent value="join" className="mt-5 space-y-3">
+          <p className="text-gray-600 mb-2">Build a join:</p>
+
+          <Select
+            value={fromModel}
+            onValueChange={(val) => {
+              setFromModel(val);
+              setFromField('');
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="From Model" />
+            </SelectTrigger>
+            <SelectContent>
+              {modelNames.map((m) => (
+                <SelectItem key={m} value={m}>
+                  {m}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {fromModel && (
+            <Select value={fromField} onValueChange={setFromField}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="From Field" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(models[fromModel]).map((field) => (
+                  <SelectItem key={field} value={field}>
+                    {field}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <Select
+            value={toModel}
+            onValueChange={(val) => {
+              setToModel(val);
+              setToField('');
+            }}
+          >
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder="To Model" />
+            </SelectTrigger>
+            <SelectContent>
+              {modelNames.map((m) => (
+                <SelectItem key={m} value={m}>
+                  {m}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {toModel && (
+            <Select value={toField} onValueChange={setToField}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="To Field" />
+              </SelectTrigger>
+              <SelectContent>
+                {Object.keys(models[toModel]).map((field) => (
+                  <SelectItem key={field} value={field}>
+                    {field}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+
+          <Button
+            className="w-full mt-2"
+            disabled={!fromModel || !fromField || !toModel || !toField}
+            onClick={() =>
+              addNode('join', {
+                fromModel,
+                fromField,
+                toModel,
+                toField,
+              })
+            }
+          >
+            + Add Join
+          </Button>
         </TabsContent>
 
-        <TabsContent value="field-relation" className="mt-5">
-          <p className="text-gray-600">Configure field relations here.</p>
-        </TabsContent>
-
-        <TabsContent value="condition" className="mt-5">
-          <p className="text-gray-600">Add conditions/filters here.</p>
+        <TabsContent value="condition" className="mt-5 space-y-3">
+          <div
+            onClick={() =>
+              addNode('condition', {
+                field: 'age',
+                comparator: '>',
+                value: 18,
+              })
+            }
+            className="w-full text-left px-3 py-2 font-medium rounded-md shadow cursor-pointer"
+          >
+            age &gt; 18
+          </div>
+          <div
+            onClick={() =>
+              addNode('condition', {
+                field: 'status',
+                comparator: '=',
+                value: 'ACTIVE',
+              })
+            }
+            className="w-full text-left px-3 py-2 font-medium rounded-md shadow cursor-pointer"
+          >
+            status = ACTIVE
+          </div>
         </TabsContent>
       </Tabs>
     </aside>
