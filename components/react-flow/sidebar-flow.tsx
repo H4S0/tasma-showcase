@@ -17,16 +17,19 @@ interface BaseNodeData extends Record<string, unknown> {
   label: string;
 }
 
-interface ModelNodeData extends BaseNodeData {
+export interface ModelNodeData extends BaseNodeData {
   modelName: string;
   fields: { name: string; type: string }[];
+  queryType: 'findMany' | 'findUnique' | 'findFirst';
+  selectedFields?: string[];
+  includeRelations?: string[];
 }
 
 interface OperationNodeData extends BaseNodeData {
   operator: 'AND' | 'OR';
 }
 
-interface JoinNodeData extends BaseNodeData {
+export interface JoinNodeData extends BaseNodeData {
   fromModel: string;
   fromField: string;
   toModel: string;
@@ -65,6 +68,9 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
           data = {
             label: model,
             modelName: model,
+            queryType: options.queryType || 'findMany',
+            selectedFields: options.selectedFields || [],
+            includeRelations: options.includeRelations || [],
             fields,
           };
           break;

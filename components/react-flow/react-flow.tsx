@@ -17,6 +17,7 @@ import ModelNode from './nodes/model-nodes';
 import OperationNode from './nodes/operation-node';
 import JoinNode from './nodes/join-node';
 import ConditionNode from './nodes/condition-node';
+import QueryBuilderPreview from './query-builder-preview';
 
 const nodeTypes = {
   modelNode: ModelNode,
@@ -66,6 +67,8 @@ export default function FlowCanvas({
         <Controls />
         <MiniMap />
       </ReactFlow>
+
+      <QueryBuilderPreview nodes={nodes} edges={edges} />
     </div>
   );
 }
