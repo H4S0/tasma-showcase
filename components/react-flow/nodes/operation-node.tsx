@@ -11,9 +11,11 @@ type OperationNodeProps = {
 
 const OperationNode = ({ data }: OperationNodeProps) => {
   return (
-    <Card className="w-40 h-20 flex items-start justify-center p-5 bg-blue-500">
-      <CardHeader className="p-2">
-        <CardTitle className="font-bold text-white">{data.operator}</CardTitle>
+    <Card className="w-40 h-20 border border-green-400">
+      <CardHeader>
+        <CardTitle className="font-semibold text-green-400">
+          {data.operator}
+        </CardTitle>
       </CardHeader>
 
       <Handle

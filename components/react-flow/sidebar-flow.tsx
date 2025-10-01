@@ -146,7 +146,6 @@ const SidebarFlow = ({
           <TabsTrigger value="condition">Condition</TabsTrigger>
         </TabsList>
 
-        {/* MODELS */}
         <TabsContent value="models" className="mt-5 space-y-3">
           {modelNames.map((model) => (
             <div key={model}>
@@ -182,7 +181,6 @@ const SidebarFlow = ({
           ))}
         </TabsContent>
 
-        {/* OPERATORS */}
         <TabsContent value="operators" className="mt-5 space-y-3">
           <div
             onClick={() => addNode('operator', { operator: 'AND' })}

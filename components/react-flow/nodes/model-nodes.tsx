@@ -12,17 +12,19 @@ type ModelNodeProps = {
 
 const ModelNode = ({ data }: ModelNodeProps) => {
   return (
-    <Card className="w-60 bg-red-400">
+    <Card className="w-60 border border-red-400">
       <CardHeader>
-        <CardTitle className="text-white">{data.modelName}</CardTitle>
+        <CardTitle className="text-red-400 font-semibold">
+          {data.modelName}
+        </CardTitle>
       </CardHeader>
-      <Separator className="bg-white" />
+      <Separator />
       <CardContent className=" p-0">
         {data.fields.map((field) => (
           <div key={field.name} className="flex flex-col justify-between px-2">
             <div className="flex items-center justify-between">
-              <span className="text-white">{field.name}</span>
-              <span className="text-white">{field.type}</span>
+              <span className="font-medium">{field.name}</span>
+              <span className="text-muted-foreground">{field.type}</span>
             </div>
           </div>
         ))}

@@ -15,10 +15,12 @@ import {
 import '@xyflow/react/dist/style.css';
 import ModelNode from './nodes/model-nodes';
 import OperationNode from './nodes/operation-node';
+import JoinNode from './nodes/join-node';
 
 const nodeTypes = {
   modelNode: ModelNode,
   operatorNode: OperationNode,
+  joinNode: JoinNode,
 };
 
 export default function FlowCanvas({
