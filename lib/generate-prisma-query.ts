@@ -4,6 +4,29 @@ import {
 } from '@/components/react-flow/sidebar-flow';
 import { Node, Edge } from '@xyflow/react';
 
+function objectToCode(obj: Record<string, any>, indent = 2): string {
+  const pad = ' '.repeat(indent);
+  return (
+    '{\n' +
+    Object.entries(obj)
+      .map(([key, val]) => {
+        if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+          return `${pad}${key}: ${objectToCode(val, indent + 2)}`;
+        } else if (Array.isArray(val)) {
+          return `${pad}${key}: [${val
+            .map((v) => JSON.stringify(v))
+            .join(', ')}]`;
+        } else {
+          return `${pad}${key}: ${JSON.stringify(val)}`;
+        }
+      })
+      .join(',\n') +
+    '\n' +
+    ' '.repeat(indent - 2) +
+    '}'
+  );
+}
+
 export function generateQuery(
   modelNode: Node<ModelNodeData>,
   allNodes: Node[],
@@ -54,34 +77,23 @@ export function generateQuery(
     select[field] = true;
   });
 
-  const selectString = Object.entries(select)
-    .map(([key, value]) => `${key}: ${value}`)
-    .join(', ');
-
   const include: Record<string, boolean> = {};
   modelNode.data.includeRelations?.forEach((rel) => {
     include[rel] = true;
   });
 
-  const whereString =
-    Object.keys(where).length > 0
-      ? 'where: {\n' +
-        Object.entries(where)
-          .map(([key, value]) => {
-            console.log(key);
-            return `${key}: ${JSON.stringify(value)}`;
-          })
-          .join(',\n') +
-        '},'
-      : '';
+  const args: Record<string, any> = {};
+  if (Object.keys(where).length > 0) args.where = where;
+  if (Object.keys(select).length > 0) args.select = select;
+  if (Object.keys(include).length > 0) args.include = include;
 
-  const includeString =
-    Object.keys(include).length > 0
-      ? 'include: { ' + Object.keys(include).join(': true, ') + ': true }'
-      : '';
+  const argsString =
+    Object.keys(args).length > 0 ? `,\n  args: ${objectToCode(args, 4)}` : '';
 
-  return `const result = await prisma.${modelNode.data.modelName}.findMany({
-  ${whereString}
-  select: { ${selectString} }${includeString ? ', ' + includeString : ''}
-});`;
+  const queryOptsString = `const queryOpts = prismaQueryOptions({
+  model: "${modelNode.data.modelName.toLowerCase()}",
+  operation: "${modelNode.data.queryType}"${argsString}
+})`;
+
+  return queryOptsString;
 }

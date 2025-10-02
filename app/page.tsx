@@ -31,6 +31,11 @@ export default function Home() {
   const { data, queryKey, isLoading } = usePrismaQuery({
     model: 'post',
     operation: 'findMany',
+    args: {
+      where: {
+        authorId: 'test',
+      },
+    },
   });
 
   return (
