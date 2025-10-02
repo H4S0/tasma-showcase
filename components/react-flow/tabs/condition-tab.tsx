@@ -42,20 +42,20 @@ const ConditionTab = ({ models, setNodes }: ModelTabProps) => {
           <SelectValue placeholder="Select Field" />
         </SelectTrigger>
         <SelectContent>
-          {modelNames.flatMap((model) =>
-            Object.keys(models[model]).map((field, index) => (
-              <div key={`${model}.${field}`}>
-                {index === 0 && (
-                  <div>
-                    <p className="font-semibold px-3">{model}</p>
-                    <SelectSeparator />
-                  </div>
-                )}
-
-                <SelectItem value={`${field}`}>{field}</SelectItem>
-              </div>
-            ))
-          )}
+          {modelNames.map((model) => (
+            <div key={model}>
+              <p className="font-semibold px-3">{model}</p>
+              <SelectSeparator />
+              {Object.keys(models[model]).map((field) => (
+                <SelectItem
+                  key={`${model}.${field}`}
+                  value={`${model}.${field}`}
+                >
+                  {field}
+                </SelectItem>
+              ))}
+            </div>
+          ))}
         </SelectContent>
       </Select>
 

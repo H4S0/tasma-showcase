@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Dialog,
   DialogContent,
@@ -17,6 +18,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel } from '../ui/form';
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { toast } from 'sonner';
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
 
 const CreatePostSchema = z.object({
   title: z.string(),
@@ -24,6 +26,9 @@ const CreatePostSchema = z.object({
 });
 
 const CreatePostForm = ({ queryKey }: { queryKey: QueryKey }) => {
+  const { getUser } = useKindeBrowserClient();
+  const user = getUser();
+
   const [isOpen, setIsOpen] = useState(false);
 
   const form = useForm<z.infer<typeof CreatePostSchema>>({
@@ -37,18 +42,22 @@ const CreatePostForm = ({ queryKey }: { queryKey: QueryKey }) => {
   });
 
   const onSubmit: SubmitHandler<z.infer<typeof CreatePostSchema>> = (data) => {
+    if (!user) return;
+
     createPost.mutate(
-      { data },
       {
-        onSuccess: (response) => {
+        data: {
+          ...data,
+          authorId: user.id,
+        },
+      },
+      {
+        onSuccess: () => {
           toast.success('Post created successfully!');
           setIsOpen(false);
-          form.reset({
-            title: '',
-            content: '',
-          });
+          form.reset({ title: '', content: '' });
         },
-        onError: (error) => {
+        onError: (error: any) => {
           toast.error(`Error creating post: ${error.message}`);
         },
       }
