@@ -1,7 +1,13 @@
 import {
+  FunctionKeys,
+  OperationArgs,
+  PrismaQueryConfig,
+} from '@/app/lib/types';
+import {
   ConditionNodeData,
   ModelNodeData,
 } from '@/components/react-flow/sidebar-flow';
+import { PrismaClient } from '@prisma/client';
 import { Node, Edge } from '@xyflow/react';
 
 function objectToCode(obj: Record<string, any>, indent = 2): string {
@@ -27,11 +33,18 @@ function objectToCode(obj: Record<string, any>, indent = 2): string {
   );
 }
 
-export function generateQuery(
+export function generateQuery<
+  TModel extends keyof PrismaClient,
+  TOperation extends FunctionKeys<PrismaClient[TModel]>,
+  TArgs = OperationArgs<PrismaClient[TModel], TOperation>
+>(
   modelNode: Node<ModelNodeData>,
   allNodes: Node[],
   allEdges: Edge[]
-) {
+): {
+  queryOpts: PrismaQueryConfig<TModel, TOperation, TArgs>;
+  queryOptsString: string;
+} {
   const conditions = allEdges
     .filter((edge) => edge.target === modelNode.id)
     .map((edge) => allNodes.find((n) => n.id === edge.source))
@@ -87,6 +100,12 @@ export function generateQuery(
   if (Object.keys(select).length > 0) args.select = select;
   if (Object.keys(include).length > 0) args.include = include;
 
+  const queryOpts: PrismaQueryConfig<TModel, TOperation, TArgs> = {
+    model: modelNode.data.modelName as TModel,
+    operation: modelNode.data.queryType as TOperation,
+    ...(Object.keys(args).length > 0 ? { args: args as TArgs } : {}),
+  };
+
   const argsString =
     Object.keys(args).length > 0 ? `,\n  args: ${objectToCode(args, 4)}` : '';
 
@@ -95,5 +114,5 @@ export function generateQuery(
   operation: "${modelNode.data.queryType}"${argsString}
 })`;
 
-  return queryOptsString;
+  return { queryOpts, queryOptsString };
 }
