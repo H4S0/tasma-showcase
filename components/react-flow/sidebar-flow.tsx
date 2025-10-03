@@ -27,6 +27,7 @@ export interface ModelNodeData extends BaseNodeData {
   take?: number;
   cursor?: string;
   orderBy: { field: string; direction: 'asc' | 'desc' };
+  isMainModel: boolean;
 }
 
 interface OperationNodeData extends BaseNodeData {
@@ -79,6 +80,7 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
             skip: options.skip ?? 0,
             take: options.take ?? 0,
             orderBy: options.orderBy || { field: '', direction: 'asc' },
+            isMainModel: options.isMainModel ?? false,
             fields,
           };
           break;
