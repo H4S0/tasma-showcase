@@ -100,6 +100,21 @@ export function generateQuery<
   if (Object.keys(select).length > 0) args.select = select;
   if (Object.keys(include).length > 0) args.include = include;
 
+  if (typeof modelNode.data.skip === 'number' && modelNode.data.skip > 0) {
+    args.skip = modelNode.data.skip;
+  }
+  if (typeof modelNode.data.take === 'number' && modelNode.data.take > 0) {
+    args.take = modelNode.data.take;
+  }
+  if (modelNode.data.orderBy && modelNode.data.orderBy.field) {
+    args.orderBy = {
+      [modelNode.data.orderBy.field]: modelNode.data.orderBy.direction,
+    };
+  }
+  if (modelNode.data.cursor && modelNode.data.cursor !== '') {
+    args.cursor = { id: modelNode.data.cursor };
+  }
+
   const queryOpts: PrismaQueryConfig<TModel, TOperation, TArgs> = {
     model: modelNode.data.modelName as TModel,
     operation: modelNode.data.queryType as TOperation,
