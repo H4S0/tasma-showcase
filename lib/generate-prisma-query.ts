@@ -42,9 +42,12 @@ export function generateQuery<
   allNodes: Node[],
   allEdges: Edge[]
 ): {
-  queryOpts: PrismaQueryConfig<TModel, TOperation, TArgs>;
-  queryOptsString: string;
+  queryOpts: PrismaQueryConfig<TModel, TOperation, TArgs> | null;
+  queryOptsString: string | null;
 } {
+  if (!modelNode.data.isMainModel) {
+    return { queryOpts: null, queryOptsString: null };
+  }
   const conditions = allEdges
     .filter((edge) => edge.target === modelNode.id)
     .map((edge) => allNodes.find((n) => n.id === edge.source))
