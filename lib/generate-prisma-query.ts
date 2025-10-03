@@ -103,14 +103,17 @@ export function generateQuery<
   if (typeof modelNode.data.skip === 'number' && modelNode.data.skip > 0) {
     args.skip = modelNode.data.skip;
   }
+
   if (typeof modelNode.data.take === 'number' && modelNode.data.take > 0) {
     args.take = modelNode.data.take;
   }
+
   if (modelNode.data.orderBy && modelNode.data.orderBy.field) {
     args.orderBy = {
       [modelNode.data.orderBy.field]: modelNode.data.orderBy.direction,
     };
   }
+
   if (modelNode.data.cursor && modelNode.data.cursor !== '') {
     args.cursor = { id: modelNode.data.cursor };
   }

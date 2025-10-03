@@ -19,8 +19,6 @@ type ModelNodeProps = {
 };
 
 const ModelNode = ({ data }: ModelNodeProps) => {
-  console.log(data);
-
   return (
     <Card className="w-60 border border-red-400">
       <CardHeader className="text-red-400 flex items-center gap-2">

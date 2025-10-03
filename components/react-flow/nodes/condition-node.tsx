@@ -13,7 +13,6 @@ type ConditionNodeProps = {
 };
 
 const ConditionNode = ({ data }: ConditionNodeProps) => {
-  console.log(data);
   const dotPosition = data.field.indexOf('.');
   const displayField =
     dotPosition !== -1 ? data.field.slice(dotPosition + 1) : data.field;
