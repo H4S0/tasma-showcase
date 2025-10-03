@@ -16,7 +16,12 @@ type QueryBuilderPreviewProps = {
 
 const QueryBuilderPreview = ({ nodes, edges }: QueryBuilderPreviewProps) => {
   const modelNodes = nodes.filter(
-    (node): node is Node<ModelNodeData> => node.type === 'modelNode'
+    (node): node is Node<ModelNodeData> =>
+      node.type === 'modelNode' &&
+      typeof node.data === 'object' &&
+      node.data !== null &&
+      'isMainModel' in node.data &&
+      node.data.isMainModel === true
   );
 
   const generated = modelNodes.map((node) => generateQuery(node, nodes, edges));
@@ -30,6 +35,7 @@ const QueryBuilderPreview = ({ nodes, edges }: QueryBuilderPreviewProps) => {
     model: 'post',
     operation: 'findMany',
   };
+
   const firstQueryOpts = queryOptsArray[0] ?? dummyQuery;
 
   const { data, isLoading, isFetching, error } = usePrismaQuery(

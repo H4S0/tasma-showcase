@@ -42,9 +42,12 @@ export function generateQuery<
   allNodes: Node[],
   allEdges: Edge[]
 ): {
-  queryOpts: PrismaQueryConfig<TModel, TOperation, TArgs>;
-  queryOptsString: string;
+  queryOpts: PrismaQueryConfig<TModel, TOperation, TArgs> | null;
+  queryOptsString: string | null;
 } {
+  if (!modelNode.data.isMainModel) {
+    return { queryOpts: null, queryOptsString: null };
+  }
   const conditions = allEdges
     .filter((edge) => edge.target === modelNode.id)
     .map((edge) => allNodes.find((n) => n.id === edge.source))
@@ -103,14 +106,17 @@ export function generateQuery<
   if (typeof modelNode.data.skip === 'number' && modelNode.data.skip > 0) {
     args.skip = modelNode.data.skip;
   }
+
   if (typeof modelNode.data.take === 'number' && modelNode.data.take > 0) {
     args.take = modelNode.data.take;
   }
+
   if (modelNode.data.orderBy && modelNode.data.orderBy.field) {
     args.orderBy = {
       [modelNode.data.orderBy.field]: modelNode.data.orderBy.direction,
     };
   }
+
   if (modelNode.data.cursor && modelNode.data.cursor !== '') {
     args.cursor = { id: modelNode.data.cursor };
   }

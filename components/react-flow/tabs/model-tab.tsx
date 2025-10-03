@@ -31,6 +31,7 @@ type ModelOptions = {
   skip?: number;
   take?: number;
   orderBy?: { field: string; direction: 'asc' | 'desc' };
+  isMainModel: boolean;
 };
 
 const ModelTab = ({ models, setNodes }: ModelTabProps) => {
@@ -47,6 +48,17 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
         ...prev[model],
         queryType: prev[model]?.queryType || 'findMany',
         selectedFields: prev[model]?.selectedFields || [],
+        ...update,
+      },
+    }));
+  };
+
+  const setMainModel = (model: string, update: Partial<ModelOptions>) => {
+    setModelOptions((prev) => ({
+      ...prev,
+      [model]: {
+        ...prev[model],
+        isMainModel: prev[model]?.isMainModel || false,
         ...update,
       },
     }));
@@ -88,7 +100,20 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
               </DropdownMenuTrigger>
 
               <DropdownMenuContent className="w-72">
-                <DropdownMenuLabel>{model} fields</DropdownMenuLabel>
+                <div className="flex items-center justify-between">
+                  <DropdownMenuLabel>{model} fields</DropdownMenuLabel>
+                  <div className="flex items-center">
+                    <Checkbox
+                      checked={opts.isMainModel}
+                      onCheckedChange={(value) => {
+                        setMainModel(model, {
+                          isMainModel: value === true,
+                        });
+                      }}
+                    />
+                    <DropdownMenuLabel>Main model</DropdownMenuLabel>
+                  </div>
+                </div>
                 <DropdownMenuSeparator />
 
                 {Object.entries(models[model]).map(([field, meta]) => (
@@ -102,7 +127,7 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Checkbox
-                        checked={opts.selectedFields.includes(field)}
+                        checked={opts.selectedFields?.includes(field)}
                         onCheckedChange={() => toggleField(field)}
                       />
                       <span>{field}</span>
@@ -247,6 +272,7 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                       skip: opts.skip,
                       take: opts.take,
                       orderBy: opts.orderBy,
+                      isMainModel: opts.isMainModel,
                     })
                   }
                 >

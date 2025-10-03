@@ -10,6 +10,7 @@ import ModelTab from './tabs/model-tab';
 import OperatorTab from './tabs/operator-tab';
 import ConditionTab from './tabs/condition-tab';
 import JoinTab from './tabs/join-tab';
+import { toast } from 'sonner';
 
 export type NodeKind = 'model' | 'operator' | 'join' | 'condition';
 
@@ -27,6 +28,7 @@ export interface ModelNodeData extends BaseNodeData {
   take?: number;
   cursor?: string;
   orderBy: { field: string; direction: 'asc' | 'desc' };
+  isMainModel: boolean;
 }
 
 interface OperationNodeData extends BaseNodeData {
@@ -46,12 +48,6 @@ export interface ConditionNodeData extends BaseNodeData {
   value: string | number;
 }
 
-type FlowNodeData =
-  | ModelNodeData
-  | OperationNodeData
-  | JoinNodeData
-  | ConditionNodeData;
-
 type SidebarFlowProps = {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   models: Model;
@@ -60,77 +56,98 @@ type SidebarFlowProps = {
 const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
   const addNode = useCallback(
     (kind: NodeKind, options?: any) => {
-      let data: FlowNodeData;
-
-      switch (kind) {
-        case 'model': {
-          const model = options.model as string;
-          const fields = Object.entries(models[model]).map(([name, meta]) => ({
-            name,
-            type: meta.type,
-          }));
-          data = {
-            label: model,
-            modelName: model,
-            queryType: options.queryType || 'findMany',
-            selectedFields: options.selectedFields || [],
-            includeRelations: options.includeRelations || [],
-            cursor: options.cursor || '',
-            skip: options.skip ?? 0,
-            take: options.take ?? 0,
-            orderBy: options.orderBy || { field: '', direction: 'asc' },
-            fields,
-          };
-          break;
-        }
-
-        case 'operator': {
-          data = {
-            label: options.operator,
-            operator: options.operator,
-          };
-          break;
-        }
-
-        case 'join': {
-          data = {
-            label: `${options.fromModel}.${options.fromField} → ${options.toModel}.${options.toField}`,
-            fromModel: options.fromModel,
-            fromField: options.fromField,
-            toModel: options.toModel,
-            toField: options.toField,
-          };
-          break;
-        }
-
-        case 'condition': {
-          data = {
-            label: `${options.field} ${options.comparator} ${options.value}`,
-            field: options.field,
-            comparator: options.comparator,
-            value: options.value,
-          };
-          break;
-        }
-
-        default:
-          throw new Error('Unknown node kind');
+      if (kind === 'model' && options?.isMainModel) {
+        setNodes((currentNodes) => {
+          const mainModelExists = currentNodes.some(
+            (n) =>
+              n.type === 'modelNode' &&
+              (n.data as ModelNodeData).isMainModel === true
+          );
+          if (mainModelExists) {
+            toast.error('You can only have one main model!');
+            return currentNodes;
+          }
+          return [...currentNodes, createModelNode(options)];
+        });
+        return;
       }
 
-      const newNode: Node = {
-        id: `${kind}-${Date.now()}`,
-        type: `${kind}Node`,
-        position: {
-          x: Math.random() * 400 + 100,
-          y: Math.random() * 400 + 100,
-        },
-        data,
-      };
-
-      setNodes((n) => [...n, newNode]);
+      setNodes((currentNodes) => {
+        switch (kind) {
+          case 'model':
+            return [...currentNodes, createModelNode(options)];
+          case 'operator':
+            return [...currentNodes, createOperatorNode(options)];
+          case 'join':
+            return [...currentNodes, createJoinNode(options)];
+          case 'condition':
+            return [...currentNodes, createConditionNode(options)];
+          default:
+            return currentNodes;
+        }
+      });
     },
     [models, setNodes]
   );
+
+  const createModelNode = (options: any): Node<ModelNodeData> => {
+    const model = options.model as string;
+    const fields = Object.entries(models[model]).map(([name, meta]) => ({
+      name,
+      type: meta.type,
+    }));
+
+    return {
+      id: `model-${Date.now()}`,
+      type: 'modelNode',
+      position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+      data: {
+        label: model,
+        modelName: model,
+        queryType: options.queryType || 'findMany',
+        selectedFields: options.selectedFields || [],
+        includeRelations: options.includeRelations || [],
+        cursor: options.cursor || '',
+        skip: options.skip ?? 0,
+        take: options.take ?? 0,
+        orderBy: options.orderBy || { field: '', direction: 'asc' },
+        isMainModel: options.isMainModel ?? false,
+        fields,
+      },
+    };
+  };
+
+  const createOperatorNode = (options: any): Node<OperationNodeData> => ({
+    id: `operator-${Date.now()}`,
+    type: 'operatorNode',
+    position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+    data: { label: options.operator, operator: options.operator },
+  });
+
+  const createJoinNode = (options: any): Node<JoinNodeData> => ({
+    id: `join-${Date.now()}`,
+    type: 'joinNode',
+    position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+    data: {
+      label: `${options.fromModel}.${options.fromField} → ${options.toModel}.${options.toField}`,
+      fromModel: options.fromModel,
+      fromField: options.fromField,
+      toModel: options.toModel,
+      toField: options.toField,
+    },
+  });
+
+  const createConditionNode = (options: any): Node<ConditionNodeData> => ({
+    id: `condition-${Date.now()}`,
+    type: 'conditionNode',
+    position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
+    data: {
+      label: `${options.field} ${options.comparator} ${options.value}`,
+      field: options.field,
+      comparator: options.comparator,
+      value: options.value,
+    },
+  });
 
   return (
     <aside className="w-72 bg-gray-100 border-r border-gray-300 p-4 overflow-y-auto">
