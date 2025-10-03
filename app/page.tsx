@@ -4,8 +4,12 @@ import React from 'react';
 import { usePrismaQuery } from './hooks/use-prisma-query';
 import { Skeleton } from '@/components/ui/skeleton';
 import CreatePostForm from '@/components/form/create-post-form';
+import { useKindeBrowserClient } from '@kinde-oss/kinde-auth-nextjs';
 
 export default function Home() {
+  const { getUser } = useKindeBrowserClient();
+  const user = getUser();
+
   /*
     Usage of query options:
     const queryOpts = prismaQueryOptions({
@@ -38,7 +42,7 @@ export default function Home() {
       <div className="max-w-3xl mx-auto px-6 py-10 space-y-5">
         <div className="flex items-center justify-between">
           <h1 className="font-bold text-gray-800 text-lg">Posts</h1>
-          <CreatePostForm queryKey={queryKey} />
+          {user && <CreatePostForm queryKey={queryKey} />}
         </div>
 
         {isLoading &&
