@@ -48,6 +48,13 @@ export interface ConditionNodeData extends BaseNodeData {
   value: string | number;
 }
 
+export type NodeOptionsMap = {
+  model: ModelNodeData;
+  operator: OperationNodeData;
+  join: JoinNodeData;
+  condition: ConditionNodeData;
+};
+
 type SidebarFlowProps = {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
   models: Model;
@@ -55,8 +62,8 @@ type SidebarFlowProps = {
 
 const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
   const addNode = useCallback(
-    (kind: NodeKind, options?: any) => {
-      if (kind === 'model' && options?.isMainModel) {
+    <K extends NodeKind>(kind: K, options: NodeOptionsMap[K]) => {
+      if (kind === 'model' && (options as ModelNodeData)?.isMainModel) {
         setNodes((currentNodes) => {
           const mainModelExists = currentNodes.some(
             (n) =>
@@ -67,7 +74,7 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
             toast.error('You can only have one main model!');
             return currentNodes;
           }
-          return [...currentNodes, createModelNode(options)];
+          return [...currentNodes, createModelNode(options as ModelNodeData)];
         });
         return;
       }
@@ -75,13 +82,19 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
       setNodes((currentNodes) => {
         switch (kind) {
           case 'model':
-            return [...currentNodes, createModelNode(options)];
+            return [...currentNodes, createModelNode(options as ModelNodeData)];
           case 'operator':
-            return [...currentNodes, createOperatorNode(options)];
+            return [
+              ...currentNodes,
+              createOperatorNode(options as OperationNodeData),
+            ];
           case 'join':
-            return [...currentNodes, createJoinNode(options)];
+            return [...currentNodes, createJoinNode(options as JoinNodeData)];
           case 'condition':
-            return [...currentNodes, createConditionNode(options)];
+            return [
+              ...currentNodes,
+              createConditionNode(options as ConditionNodeData),
+            ];
           default:
             return currentNodes;
         }
@@ -90,7 +103,7 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
     [models, setNodes]
   );
 
-  const createModelNode = (options: any): Node<ModelNodeData> => {
+  const createModelNode = (options: ModelNodeData): Node<ModelNodeData> => {
     const model = options.model as string;
     const fields = Object.entries(models[model]).map(([name, meta]) => ({
       name,
@@ -117,14 +130,16 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
     };
   };
 
-  const createOperatorNode = (options: any): Node<OperationNodeData> => ({
+  const createOperatorNode = (
+    options: OperationNodeData
+  ): Node<OperationNodeData> => ({
     id: `operator-${Date.now()}`,
     type: 'operatorNode',
     position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
     data: { label: options.operator, operator: options.operator },
   });
 
-  const createJoinNode = (options: any): Node<JoinNodeData> => ({
+  const createJoinNode = (options: JoinNodeData): Node<JoinNodeData> => ({
     id: `join-${Date.now()}`,
     type: 'joinNode',
     position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
@@ -137,7 +152,9 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
     },
   });
 
-  const createConditionNode = (options: any): Node<ConditionNodeData> => ({
+  const createConditionNode = (
+    options: ConditionNodeData
+  ): Node<ConditionNodeData> => ({
     id: `condition-${Date.now()}`,
     type: 'conditionNode',
     position: { x: Math.random() * 400 + 100, y: Math.random() * 400 + 100 },
@@ -152,7 +169,7 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
   return (
     <aside className="w-72 bg-gray-100 border-r border-gray-300 p-4 overflow-y-auto">
       <Tabs defaultValue="models" className="w-full">
-        <TabsList className="grid grid-cols-4 gap-1 mb-4">
+        <TabsList className="grid grid-cols-2 gap-1 mb-4 w-full">
           <TabsTrigger value="models">Models</TabsTrigger>
           <TabsTrigger value="operators">Operator</TabsTrigger>
           <TabsTrigger value="join">Join</TabsTrigger>
