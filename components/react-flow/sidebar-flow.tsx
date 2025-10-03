@@ -23,6 +23,10 @@ export interface ModelNodeData extends BaseNodeData {
   queryType: 'findMany' | 'findUnique' | 'findFirst';
   selectedFields?: string[];
   includeRelations?: string[];
+  skip?: number;
+  take?: number;
+  cursor?: string;
+  orderBy: { field: string; direction: 'asc' | 'desc' };
 }
 
 interface OperationNodeData extends BaseNodeData {
@@ -71,6 +75,10 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
             queryType: options.queryType || 'findMany',
             selectedFields: options.selectedFields || [],
             includeRelations: options.includeRelations || [],
+            cursor: options.cursor || '',
+            skip: options.skip || 0,
+            take: options.skip || 0,
+            orderBy: options.orderBy || 'desc',
             fields,
           };
           break;

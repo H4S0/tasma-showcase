@@ -18,36 +18,59 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 
 export type ModelTabProps = {
   setNodes: (kind: NodeKind, options?: any) => void;
   models: Model;
 };
 
+type ModelOptions = {
+  queryType: ModelNodeData['queryType'];
+  selectedFields: string[];
+  skip?: number;
+  take?: number;
+  orderBy?: { field: string; direction: 'asc' | 'desc' };
+};
+
 const ModelTab = ({ models, setNodes }: ModelTabProps) => {
   const modelNames = Object.keys(models) as (keyof typeof models)[];
-  const [selectedQueryTypes, setSelectedQueryTypes] = useState<
-    Record<string, ModelNodeData['queryType']>
+
+  const [modelOptions, setModelOptions] = useState<
+    Record<string, ModelOptions>
   >({});
-  const [selectedFieldsMap, setSelectedFieldsMap] = useState<
-    Record<string, string[]>
-  >({});
+
+  const updateModelOption = (model: string, update: Partial<ModelOptions>) => {
+    setModelOptions((prev) => ({
+      ...prev,
+      [model]: {
+        ...prev[model],
+        queryType: prev[model]?.queryType || 'findMany',
+        selectedFields: prev[model]?.selectedFields || [],
+        ...update,
+      },
+    }));
+  };
 
   return (
     <TabsContent value="models" className="mt-5 space-y-3">
       {modelNames.map((model) => {
-        const queryType = selectedQueryTypes[model] || 'findMany';
-        const selectedFields = selectedFieldsMap[model] || [];
+        const opts: ModelOptions = modelOptions[model] || {
+          queryType: 'findMany',
+          selectedFields: [],
+        };
 
         const toggleField = (field: string) => {
-          setSelectedFieldsMap((prev) => {
-            const current = prev[model] || [];
-            if (current.includes(field)) {
-              return { ...prev, [model]: current.filter((f) => f !== field) };
-            } else {
-              return { ...prev, [model]: [...current, field] };
-            }
-          });
+          const current = opts.selectedFields || [];
+          if (current.includes(field)) {
+            updateModelOption(model, {
+              selectedFields: current.filter((f) => f !== field),
+            });
+          } else {
+            updateModelOption(model, {
+              selectedFields: [...current, field],
+            });
+          }
         };
 
         return (
@@ -57,10 +80,11 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                 {model}
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent className="w-64">
+              <DropdownMenuContent className="w-72">
                 <DropdownMenuLabel>{model} fields</DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
+                {/* Fields */}
                 {Object.entries(models[model]).map(([field, meta]) => (
                   <DropdownMenuItem
                     key={field}
@@ -72,7 +96,7 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Checkbox
-                        checked={selectedFields.includes(field)}
+                        checked={opts.selectedFields.includes(field)}
                         onCheckedChange={() => toggleField(field)}
                       />
                       <span>{field}</span>
@@ -83,17 +107,17 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
 
                 <DropdownMenuSeparator />
 
+                {/* Query type */}
                 <DropdownMenuItem className="flex flex-col gap-1 items-start">
                   <DropdownMenuLabel className="text-sm font-medium">
-                    Query Type:
+                    Query Type
                   </DropdownMenuLabel>
                   <Select
-                    value={queryType}
+                    value={opts.queryType}
                     onValueChange={(value) =>
-                      setSelectedQueryTypes((prev) => ({
-                        ...prev,
-                        [model]: value as ModelNodeData['queryType'],
-                      }))
+                      updateModelOption(model, {
+                        queryType: value as ModelNodeData['queryType'],
+                      })
                     }
                   >
                     <SelectTrigger className="w-full">
@@ -109,14 +133,102 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
 
                 <DropdownMenuSeparator />
 
+                {/* Pagination */}
+                <DropdownMenuItem className="flex flex-col gap-2 items-start">
+                  <DropdownMenuLabel className="text-sm font-medium">
+                    Pagination
+                  </DropdownMenuLabel>
+                  <Input
+                    type="number"
+                    placeholder="Skip"
+                    value={opts.skip ?? ''}
+                    onChange={(e) =>
+                      updateModelOption(model, {
+                        skip: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      })
+                    }
+                  />
+                  <Input
+                    type="number"
+                    placeholder="Take"
+                    value={opts.take ?? ''}
+                    onChange={(e) =>
+                      updateModelOption(model, {
+                        take: e.target.value
+                          ? Number(e.target.value)
+                          : undefined,
+                      })
+                    }
+                  />
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                {/* Order By */}
+                <DropdownMenuItem className="flex flex-col gap-2 items-start">
+                  <DropdownMenuLabel className="text-sm font-medium">
+                    Order By
+                  </DropdownMenuLabel>
+                  <Select
+                    value={opts.orderBy?.field || ''}
+                    onValueChange={(value) =>
+                      updateModelOption(model, {
+                        orderBy: {
+                          field: value,
+                          direction: opts.orderBy?.direction || 'asc',
+                        },
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Field" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Object.keys(models[model]).map((field) => (
+                        <SelectItem key={field} value={field}>
+                          {field}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <Select
+                    value={opts.orderBy?.direction || ''}
+                    onValueChange={(value) =>
+                      updateModelOption(model, {
+                        orderBy: {
+                          field: opts.orderBy?.field || '',
+                          direction: value as 'asc' | 'desc',
+                        },
+                      })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Direction" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="asc">asc</SelectItem>
+                      <SelectItem value="desc">desc</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                {/* Add Node */}
                 <DropdownMenuItem
                   className="text-center font-semibold text-blue-600 cursor-pointer"
                   onClick={() =>
                     setNodes('model', {
                       model,
-                      queryType,
-                      selectedFields,
+                      queryType: opts.queryType,
+                      selectedFields: opts.selectedFields,
                       includeRelations: [],
+                      skip: opts.skip,
+                      take: opts.take,
+                      orderBy: opts.orderBy,
                     })
                   }
                 >
