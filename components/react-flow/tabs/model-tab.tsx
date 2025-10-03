@@ -58,7 +58,7 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
       ...prev,
       [model]: {
         ...prev[model],
-        isMainModel: prev[model].isMainModel || false,
+        isMainModel: prev[model]?.isMainModel || false,
         ...update,
       },
     }));
@@ -127,7 +127,7 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Checkbox
-                        checked={opts.selectedFields.includes(field)}
+                        checked={opts.selectedFields?.includes(field)}
                         onCheckedChange={() => toggleField(field)}
                       />
                       <span>{field}</span>
