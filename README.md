@@ -62,8 +62,10 @@ To run this project, you will need to add the following environment variables to
 `KINDE_POST_LOGOUT_REDIRECT_URL`
 `KINDE_POST_LOGIN_REDIRECT_URL`
 
+PRISMA ENV Docs: https://www.prisma.io/docs/orm/more/development-environment/environment-variables
+NEXTJS KINDE Docs:https://docs.kinde.com/developer-tools/sdks/backend/nextjs-sdk/
+
 <img width="1890" height="892" alt="image" src="https://github.com/user-attachments/assets/8e5d6f8f-4fd3-44d7-8ee8-0ebde34bad16" />
 
 
-NEXTJS KINDE Docs:https://docs.kinde.com/developer-tools/sdks/backend/nextjs-sdk/
-PRISMA ENV Docs: https://www.prisma.io/docs/orm/more/development-environment/environment-variables
+<img width="1893" height="907" alt="Screenshot 2025-10-03 101922" src="https://github.com/user-attachments/assets/c208194f-b9d2-44cd-bd06-340ff3dc3ad6" />
