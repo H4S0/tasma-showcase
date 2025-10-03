@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { NodeKind, ModelNodeData } from '../sidebar-flow';
+import { ModelNodeData, AddNodeFn } from '../sidebar-flow';
 import { Model } from '../client-page/client-flow-page';
 import {
   DropdownMenu,
@@ -24,7 +24,7 @@ import { TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 
 export type ModelTabProps = {
-  setNodes: (kind: NodeKind, options?: any) => void;
+  setNodes: AddNodeFn;
   models: Model;
 };
 
@@ -278,10 +278,16 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                 <div className="px-2 py-2">
                   <Button
                     className="w-full"
-                    variant="outline"
                     onClick={() =>
                       setNodes('model', {
-                        model,
+                        modelName: model,
+                        fields: Object.entries(models[model]).map(
+                          ([name, meta]) => ({
+                            name,
+                            type: meta.type,
+                          })
+                        ),
+                        label: model,
                         queryType: opts.queryType,
                         selectedFields: opts.selectedFields,
                         includeRelations: [],

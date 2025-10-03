@@ -27,7 +27,7 @@ export interface ModelNodeData extends BaseNodeData {
   skip?: number;
   take?: number;
   cursor?: string;
-  orderBy: { field: string; direction: 'asc' | 'desc' };
+  orderBy?: { field: string; direction: 'asc' | 'desc' };
   isMainModel: boolean;
 }
 
@@ -54,6 +54,11 @@ export type NodeOptionsMap = {
   join: JoinNodeData;
   condition: ConditionNodeData;
 };
+
+export type AddNodeFn = <K extends NodeKind>(
+  kind: K,
+  options: NodeOptionsMap[K]
+) => void;
 
 type SidebarFlowProps = {
   setNodes: React.Dispatch<React.SetStateAction<Node[]>>;
@@ -104,10 +109,16 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
   );
 
   const createModelNode = (options: ModelNodeData): Node<ModelNodeData> => {
-    const model = options.model as string;
-    const fields = Object.entries(models[model]).map(([name, meta]) => ({
+    const model = options.modelName;
+    const modelDef = models[model];
+
+    if (!modelDef) {
+      throw new Error(`Model "${model}" not found in models`);
+    }
+
+    const fields = Object.entries(modelDef).map(([name, meta]) => ({
       name,
-      type: meta.type,
+      type: (meta as { type: string }).type,
     }));
 
     return {

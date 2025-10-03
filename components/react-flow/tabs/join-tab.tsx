@@ -97,6 +97,7 @@ const JoinTab = ({ models, setNodes }: ModelTabProps) => {
         disabled={!fromModel || !fromField || !toModel || !toField}
         onClick={() =>
           setNodes('join', {
+            label: `Join ${fromModel}.${fromField} -> ${toModel}.${toField}`,
             fromModel,
             fromField,
             toModel,

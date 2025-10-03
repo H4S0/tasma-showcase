@@ -17,7 +17,8 @@ import { ModelTabProps } from './model-tab';
 
 const ConditionTab = ({ models, setNodes }: ModelTabProps) => {
   const [conditionField, setConditionField] = useState('');
-  const [comparator, setComparator] = useState('');
+  const [comparator, setComparator] =
+    useState<ConditionNodeData['comparator']>('=');
   const [conditionValue, setConditionValue] = useState('');
 
   const comparators: ConditionNodeData['comparator'][] = [
@@ -59,7 +60,12 @@ const ConditionTab = ({ models, setNodes }: ModelTabProps) => {
         </SelectContent>
       </Select>
 
-      <Select value={comparator} onValueChange={setComparator}>
+      <Select
+        value={comparator}
+        onValueChange={(value) =>
+          setComparator(value as ConditionNodeData['comparator'])
+        }
+      >
         <SelectTrigger className="w-full">
           <SelectValue placeholder="Select Comparator" />
         </SelectTrigger>
@@ -86,6 +92,7 @@ const ConditionTab = ({ models, setNodes }: ModelTabProps) => {
             field: conditionField,
             comparator,
             value: conditionValue,
+            label: `${conditionField} ${comparator} ${conditionValue}`,
           })
         }
       >
