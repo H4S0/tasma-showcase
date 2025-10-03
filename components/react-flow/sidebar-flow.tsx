@@ -76,9 +76,9 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
             selectedFields: options.selectedFields || [],
             includeRelations: options.includeRelations || [],
             cursor: options.cursor || '',
-            skip: options.skip || 0,
-            take: options.skip || 0,
-            orderBy: options.orderBy || 'desc',
+            skip: options.skip ?? 0,
+            take: options.take ?? 0,
+            orderBy: options.orderBy || { field: '', direction: 'asc' },
             fields,
           };
           break;
@@ -135,7 +135,7 @@ const SidebarFlow = ({ setNodes, models }: SidebarFlowProps) => {
   return (
     <aside className="w-72 bg-gray-100 border-r border-gray-300 p-4 overflow-y-auto">
       <Tabs defaultValue="models" className="w-full">
-        <TabsList className="grid grid-cols-3 gap-1 mb-4">
+        <TabsList className="grid grid-cols-4 gap-1 mb-4">
           <TabsTrigger value="models">Models</TabsTrigger>
           <TabsTrigger value="operators">Operator</TabsTrigger>
           <TabsTrigger value="join">Join</TabsTrigger>

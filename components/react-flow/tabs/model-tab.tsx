@@ -73,6 +73,13 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
           }
         };
 
+        const handleNumberChange = (key: 'skip' | 'take', value: string) => {
+          const parsed = Number(value);
+          updateModelOption(model, {
+            [key]: !value || isNaN(parsed) || parsed < 0 ? undefined : parsed,
+          });
+        };
+
         return (
           <div key={model}>
             <DropdownMenu>
@@ -84,12 +91,11 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
                 <DropdownMenuLabel>{model} fields</DropdownMenuLabel>
                 <DropdownMenuSeparator />
 
-                {/* Fields */}
                 {Object.entries(models[model]).map(([field, meta]) => (
                   <DropdownMenuItem
                     key={field}
                     className="flex justify-between items-center"
-                    onClick={(e) => e.preventDefault()}
+                    onSelect={(e) => e.preventDefault()}
                   >
                     <div
                       className="flex items-center gap-2"
@@ -107,119 +113,131 @@ const ModelTab = ({ models, setNodes }: ModelTabProps) => {
 
                 <DropdownMenuSeparator />
 
-                {/* Query type */}
-                <DropdownMenuItem className="flex flex-col gap-1 items-start">
+                <DropdownMenuItem
+                  className="flex flex-col gap-1 items-start"
+                  onSelect={(e) => e.preventDefault()}
+                >
                   <DropdownMenuLabel className="text-sm font-medium">
                     Query Type
                   </DropdownMenuLabel>
-                  <Select
-                    value={opts.queryType}
-                    onValueChange={(value) =>
-                      updateModelOption(model, {
-                        queryType: value as ModelNodeData['queryType'],
-                      })
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Query type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="findMany">findMany</SelectItem>
-                      <SelectItem value="findUnique">findUnique</SelectItem>
-                      <SelectItem value="findFirst">findFirst</SelectItem>
-                    </SelectContent>
-                  </Select>
+                  <div className="w-full" onClick={(e) => e.stopPropagation()}>
+                    <Select
+                      value={opts.queryType}
+                      onValueChange={(value) =>
+                        updateModelOption(model, {
+                          queryType: value as ModelNodeData['queryType'],
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Query type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="findMany">findMany</SelectItem>
+                        <SelectItem value="findUnique">findUnique</SelectItem>
+                        <SelectItem value="findFirst">findFirst</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
 
-                {/* Pagination */}
-                <DropdownMenuItem className="flex flex-col gap-2 items-start">
+                <DropdownMenuItem
+                  className="flex flex-col gap-2 items-start"
+                  onSelect={(e) => e.preventDefault()}
+                >
                   <DropdownMenuLabel className="text-sm font-medium">
                     Pagination
                   </DropdownMenuLabel>
-                  <Input
-                    type="number"
-                    placeholder="Skip"
-                    value={opts.skip ?? ''}
-                    onChange={(e) =>
-                      updateModelOption(model, {
-                        skip: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
-                      })
-                    }
-                  />
-                  <Input
-                    type="number"
-                    placeholder="Take"
-                    value={opts.take ?? ''}
-                    onChange={(e) =>
-                      updateModelOption(model, {
-                        take: e.target.value
-                          ? Number(e.target.value)
-                          : undefined,
-                      })
-                    }
-                  />
+                  <div
+                    className="flex flex-col gap-2 w-full"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="Skip"
+                      value={opts.skip ?? ''}
+                      onChange={(e) =>
+                        handleNumberChange('skip', e.target.value)
+                      }
+                    />
+                    <Input
+                      type="number"
+                      min={0}
+                      placeholder="Take"
+                      value={opts.take ?? ''}
+                      onChange={(e) =>
+                        handleNumberChange('take', e.target.value)
+                      }
+                    />
+                  </div>
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
 
-                {/* Order By */}
-                <DropdownMenuItem className="flex flex-col gap-2 items-start">
+                <DropdownMenuItem
+                  className="flex flex-col gap-2 items-start"
+                  onSelect={(e) => e.preventDefault()}
+                >
                   <DropdownMenuLabel className="text-sm font-medium">
                     Order By
                   </DropdownMenuLabel>
-                  <Select
-                    value={opts.orderBy?.field || ''}
-                    onValueChange={(value) =>
-                      updateModelOption(model, {
-                        orderBy: {
-                          field: value,
-                          direction: opts.orderBy?.direction || 'asc',
-                        },
-                      })
-                    }
+                  <div
+                    className="flex flex-col gap-2 w-full"
+                    onClick={(e) => e.stopPropagation()}
                   >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Field" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.keys(models[model]).map((field) => (
-                        <SelectItem key={field} value={field}>
-                          {field}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={opts.orderBy?.field || ''}
+                      onValueChange={(value) =>
+                        updateModelOption(model, {
+                          orderBy: {
+                            field: value,
+                            direction: opts.orderBy?.direction || 'asc',
+                          },
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Field" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.keys(models[model]).map((field) => (
+                          <SelectItem key={field} value={field}>
+                            {field}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
 
-                  <Select
-                    value={opts.orderBy?.direction || ''}
-                    onValueChange={(value) =>
-                      updateModelOption(model, {
-                        orderBy: {
-                          field: opts.orderBy?.field || '',
-                          direction: value as 'asc' | 'desc',
-                        },
-                      })
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Direction" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="asc">asc</SelectItem>
-                      <SelectItem value="desc">desc</SelectItem>
-                    </SelectContent>
-                  </Select>
+                    <Select
+                      value={opts.orderBy?.direction || ''}
+                      onValueChange={(value) =>
+                        updateModelOption(model, {
+                          orderBy: {
+                            field: opts.orderBy?.field || '',
+                            direction: value as 'asc' | 'desc',
+                          },
+                        })
+                      }
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Direction" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="asc">asc</SelectItem>
+                        <SelectItem value="desc">desc</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </DropdownMenuItem>
 
                 <DropdownMenuSeparator />
 
-                {/* Add Node */}
                 <DropdownMenuItem
                   className="text-center font-semibold text-blue-600 cursor-pointer"
+                  onSelect={(e) => e.preventDefault()}
                   onClick={() =>
                     setNodes('model', {
                       model,
