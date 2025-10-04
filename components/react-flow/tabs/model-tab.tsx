@@ -19,9 +19,15 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Input } from '@/components/ui/input';
 import { TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { MinusIcon, PlusIcon } from 'lucide-react';
+import {
+  InputGroup,
+  InputGroupInput,
+  InputGroupAddon,
+  InputGroupButton,
+} from '@/components/ui/input-group';
 
 export type ModelTabProps = {
   setNodes: AddNodeFn;
@@ -93,7 +99,7 @@ const QueryTypeSelect = ({
   </div>
 );
 
-const PaginationInputs = ({
+export const PaginationInputs = ({
   skip,
   take,
   onChange,
@@ -101,30 +107,59 @@ const PaginationInputs = ({
   skip?: number;
   take?: number;
   onChange: (key: 'skip' | 'take', v: number | undefined) => void;
-}) => (
-  <div className="flex flex-col gap-2 w-full">
-    <Input
-      type="number"
-      min={0}
-      placeholder="Skip"
-      value={skip ?? ''}
-      onChange={(e) => {
-        const parsed = Number(e.target.value);
-        onChange('skip', isNaN(parsed) ? undefined : parsed);
-      }}
-    />
-    <Input
-      type="number"
-      min={0}
-      placeholder="Take"
-      value={take ?? ''}
-      onChange={(e) => {
-        const parsed = Number(e.target.value);
-        onChange('take', isNaN(parsed) ? undefined : parsed);
-      }}
-    />
-  </div>
-);
+}) => {
+  const handleIncrement = (key: 'skip' | 'take') => {
+    const value = key === 'skip' ? skip : take;
+    onChange(key, (value ?? 0) + 1);
+  };
+
+  const handleDecrement = (key: 'skip' | 'take') => {
+    const value = key === 'skip' ? skip : take;
+    onChange(key, Math.max((value ?? 0) - 1, 0)); // don’t go below 0
+  };
+
+  return (
+    <div className="flex flex-col gap-2 w-full">
+      <InputGroup>
+        <InputGroupInput
+          placeholder="Skip"
+          value={skip ?? ''}
+          onChange={(e) => {
+            const parsed = Number(e.target.value);
+            onChange('skip', isNaN(parsed) ? undefined : parsed);
+          }}
+        />
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton onClick={() => handleDecrement('skip')}>
+            <MinusIcon className="w-4 h-4" />
+          </InputGroupButton>
+          <InputGroupButton onClick={() => handleIncrement('skip')}>
+            <PlusIcon className="w-4 h-4" />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+
+      <InputGroup>
+        <InputGroupInput
+          placeholder="Take"
+          value={take ?? ''}
+          onChange={(e) => {
+            const parsed = Number(e.target.value);
+            onChange('take', isNaN(parsed) ? undefined : parsed);
+          }}
+        />
+        <InputGroupAddon align="inline-end">
+          <InputGroupButton onClick={() => handleDecrement('take')}>
+            <MinusIcon className="w-4 h-4" />
+          </InputGroupButton>
+          <InputGroupButton onClick={() => handleIncrement('take')}>
+            <PlusIcon className="w-4 h-4" />
+          </InputGroupButton>
+        </InputGroupAddon>
+      </InputGroup>
+    </div>
+  );
+};
 
 const OrderBySelect = ({
   modelFields,
