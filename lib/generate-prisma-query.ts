@@ -6,6 +6,7 @@ import {
 import {
   ConditionNodeData,
   ModelNodeData,
+  JoinNodeData,
 } from '@/components/react-flow/sidebar-flow';
 import { PrismaClient } from '@prisma/client';
 import { Node, Edge } from '@xyflow/react';
@@ -48,76 +49,97 @@ export function generateQuery<
   if (!modelNode.data.isMainModel) {
     return { queryOpts: null, queryOptsString: null };
   }
-  const conditions = allEdges
-    .filter((edge) => edge.target === modelNode.id)
-    .map((edge) => allNodes.find((n) => n.id === edge.source))
+
+  const getChildren = (nodeId: string) =>
+    allEdges
+      .filter((edge) => edge.target === nodeId)
+      .map((edge) => allNodes.find((n) => n.id === edge.source))
+      .filter(Boolean) as Node[];
+
+  const buildWhere = (node: Node): Record<string, any> => {
+    if (node.type === 'conditionNode') {
+      const { field, comparator, value } = node.data as ConditionNodeData;
+      const cleanField = field.includes('.') ? field.split('.')[1] : field;
+
+      switch (comparator) {
+        case '=':
+          return { [cleanField]: value };
+        case '!=':
+          return { [cleanField]: { not: value } };
+        case '>':
+          return { [cleanField]: { gt: value } };
+        case '>=':
+          return { [cleanField]: { gte: value } };
+        case '<':
+          return { [cleanField]: { lt: value } };
+        case '<=':
+          return { [cleanField]: { lte: value } };
+        case 'IN':
+          return {
+            [cleanField]: { in: Array.isArray(value) ? value : [value] },
+          };
+        case 'NOT IN':
+          return {
+            [cleanField]: { notIn: Array.isArray(value) ? value : [value] },
+          };
+        default:
+          return {};
+      }
+    }
+
+    if (node.type === 'operatorNode') {
+      const children = getChildren(node.id).map(buildWhere);
+      const op = (node.data as any).operator;
+      return { [op]: children };
+    }
+
+    return {};
+  };
+
+  const whereNodes = getChildren(modelNode.id);
+  const where = whereNodes.reduce((acc, n) => {
+    return { ...acc, ...buildWhere(n) };
+  }, {});
+
+  const joins = allEdges
     .filter(
-      (n): n is Node<ConditionNodeData> => !!n && n.type === 'conditionNode'
+      (edge) =>
+        edge.source === modelNode.id &&
+        allNodes.find((n) => n.id === edge.target)?.type === 'joinNode'
+    )
+    .map(
+      (edge) => allNodes.find((n) => n.id === edge.target) as Node<JoinNodeData>
     );
 
-  const where: Record<string, any> = {};
-  conditions.forEach((cond) => {
-    const { field, comparator, value } = cond.data;
-    const cleanField = field.includes('.') ? field.split('.')[1] : field;
-
-    switch (comparator) {
-      case '=':
-        where[cleanField] = value;
-        break;
-      case '!=':
-        where[cleanField] = { not: value };
-        break;
-      case '>':
-        where[cleanField] = { gt: value };
-        break;
-      case '>=':
-        where[cleanField] = { gte: value };
-        break;
-      case '<':
-        where[cleanField] = { lt: value };
-        break;
-      case '<=':
-        where[cleanField] = { lte: value };
-        break;
-      case 'IN':
-        where[cleanField] = { in: Array.isArray(value) ? value : [value] };
-        break;
-      case 'NOT IN':
-        where[cleanField] = { notIn: Array.isArray(value) ? value : [value] };
-        break;
-    }
-  });
-
-  const select: Record<string, boolean> = {};
-  modelNode.data.selectedFields?.forEach((field) => {
-    select[field] = true;
-  });
-
   const include: Record<string, boolean> = {};
+  joins.forEach((join) => {
+    include[join.data.toModel.toLowerCase()] = true;
+  });
+
   modelNode.data.includeRelations?.forEach((rel) => {
     include[rel] = true;
   });
+
+  const select: Record<string, boolean> = {};
+  modelNode.data.selectedFields?.forEach((f) => (select[f] = true));
 
   const args: Record<string, any> = {};
   if (Object.keys(where).length > 0) args.where = where;
   if (Object.keys(select).length > 0) args.select = select;
   if (Object.keys(include).length > 0) args.include = include;
 
-  if (typeof modelNode.data.skip === 'number' && modelNode.data.skip > 0) {
+  if (typeof modelNode.data.skip === 'number' && modelNode.data.skip > 0)
     args.skip = modelNode.data.skip;
-  }
-
-  if (typeof modelNode.data.take === 'number' && modelNode.data.take > 0) {
+  if (typeof modelNode.data.take === 'number' && modelNode.data.take > 0)
     args.take = modelNode.data.take;
-  }
 
-  if (modelNode.data.orderBy && modelNode.data.orderBy.field) {
+  if (modelNode.data.orderBy?.field) {
     args.orderBy = {
       [modelNode.data.orderBy.field]: modelNode.data.orderBy.direction,
     };
   }
 
-  if (modelNode.data.cursor && modelNode.data.cursor !== '') {
+  if (modelNode.data.cursor) {
     args.cursor = { id: modelNode.data.cursor };
   }
 
