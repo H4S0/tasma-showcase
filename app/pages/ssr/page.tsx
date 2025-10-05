@@ -1,6 +1,6 @@
 import { prismaPrefetchQuery } from '@/app/hooks/use-prisma-query';
 import { getQueryClient } from '@/components/provider/get-query-client';
-import Users from '@/components/additional/posts';
+import Posts from '@/components/additional/posts';
 import { dehydrate, HydrationBoundary } from '@tanstack/react-query';
 
 export default async function SsrFetching() {
@@ -37,7 +37,7 @@ export default async function SsrFetching() {
         </p>
 
         <HydrationBoundary state={dehydrate(queryClient)}>
-          <Users />
+          <Posts />
         </HydrationBoundary>
       </div>
     </div>
