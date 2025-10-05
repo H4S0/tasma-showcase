@@ -115,7 +115,7 @@ export const PaginationInputs = ({
 
   const handleDecrement = (key: 'skip' | 'take') => {
     const value = key === 'skip' ? skip : take;
-    onChange(key, Math.max((value ?? 0) - 1, 0)); // don’t go below 0
+    onChange(key, Math.max((value ?? 0) - 1, 0));
   };
 
   return (

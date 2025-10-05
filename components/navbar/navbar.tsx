@@ -21,10 +21,12 @@ const Navbar = async () => {
 
   return (
     <nav className="flex justify-between items-center p-4 bg-gray-800 text-white">
-      <h2 className="font-bold text-lg">Tasma showcase</h2>
+      <Link href="/" className="hover:underline">
+        Home
+      </Link>
       <div className="flex items-center gap-4">
-        <Link href="/" className="hover:underline">
-          Home
+        <Link href="/pages/flow" className="hover:underline">
+          Visual builder
         </Link>
         <Link href="/pages/table-pagination/" className="hover:underline">
           Pagination
