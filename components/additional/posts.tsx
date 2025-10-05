@@ -3,7 +3,7 @@
 import { usePrismaQuery } from '@/app/hooks/use-prisma-query';
 import { Skeleton } from '../ui/skeleton';
 
-export default function Users() {
+export default function Posts() {
   const { data, isLoading, error } = usePrismaQuery({
     model: 'post',
     operation: 'findMany',
